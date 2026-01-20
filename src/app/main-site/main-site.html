@@ -1,0 +1,163 @@
+<div class="bgDiv">
+  <div class="videoGalleryWrapper">
+    <app-vid-gallery></app-vid-gallery>
+  </div>
+  <div class="mainWrapper">
+    <div class="mainTextWrapper">
+      <p>gameRater - Curate your favorite games!</p>
+    </div>
+
+    <div class="mainIslandWrapper">
+      <div class="randomGameSection">
+        <div class="randomGameContainer">
+          <h2 class="randomGameTitle">Don't know what to play?</h2>
+          <p class="randomGameSubtitle">Click to find a random game</p>
+          <details class="priceFilterDetails" open>
+            <summary class="priceFilterSummary">📊 Price Range</summary>
+            <div class="priceFilterBox">
+              <div class="quickPriceButtons">
+                <button
+                  (click)="setQuickPrice(0, 0); customPriceActive = false"
+                  [class.active]="
+                    minPriceFilter === 0 && maxPriceFilter === 0 && !customPriceActive
+                  "
+                >
+                  Free
+                </button>
+                <button
+                  (click)="setQuickPrice(0, 5); customPriceActive = false"
+                  [class.active]="
+                    minPriceFilter === 0 && maxPriceFilter === 5 && !customPriceActive
+                  "
+                >
+                  Under $5
+                </button>
+                <button
+                  (click)="setQuickPrice(5, 20); customPriceActive = false"
+                  [class.active]="
+                    minPriceFilter === 5 && maxPriceFilter === 20 && !customPriceActive
+                  "
+                >
+                  $5-$20
+                </button>
+                <button
+                  (click)="setQuickPrice(20, 60); customPriceActive = false"
+                  [class.active]="
+                    minPriceFilter === 20 && maxPriceFilter === 60 && !customPriceActive
+                  "
+                >
+                  $20-$60
+                </button>
+                <button (click)="customPriceActive = true" [class.active]="customPriceActive">
+                  Custom Range
+                </button>
+                <button
+                  (click)="setQuickPrice(0, 9999999); customPriceActive = false"
+                  [class.active]="
+                    minPriceFilter === 0 && maxPriceFilter === 9999999 && !customPriceActive
+                  "
+                >
+                  All
+                </button>
+              </div>
+
+              @if (customPriceActive) {
+                <div class="priceFilterInputs">
+                  <div class="priceInput">
+                    <label>Min:</label>
+                    <input type="number" [(ngModel)]="minPriceFilter" min="0" placeholder="0" />
+                  </div>
+                  <div class="priceInput">
+                    <label>Max:</label>
+                    <input
+                      type="number"
+                      [(ngModel)]="maxPriceFilter"
+                      min="0"
+                      placeholder="9999999"
+                    />
+                  </div>
+                </div>
+              }
+            </div>
+          </details>
+
+          @if (loadingRandomGame) {
+            <div class="randomGameLoading">
+              <div class="spinner"></div>
+              <p>Searching for a game...</p>
+            </div>
+          } @else if (randomGame) {
+            <div class="randomGameCard">
+              <div class="randomGameHeader">
+                <img
+                  [src]="randomGame.header_image"
+                  [alt]="randomGame.name"
+                  class="randomGameImage"
+                />
+                <div class="randomGameOverlay">
+                  <h3>{{ randomGame.name }}</h3>
+                </div>
+              </div>
+
+              <div class="randomGameInfo">
+                <div class="randomGameMeta">
+                  <div class="randomGamePrice">
+                    @if (randomGame.price_overview) {
+                      <span class="price">{{ randomGame.price_overview.final_formatted }}</span>
+                    } @else {
+                      <span class="price">{{ randomGame.is_free ? 'Free' : 'Unavailable' }}</span>
+                    }
+                  </div>
+                  <div class="randomGameDeveloper">
+                    <span class="label">Developer:</span>
+                    <span class="value">{{ randomGame.developers?.join(', ') || 'Unknown' }}</span>
+                  </div>
+                </div>
+
+                <div class="randomGameDescription">
+                  {{
+                    randomGame.short_description || randomGame.about_the_game?.substring(0, 200)
+                  }}...
+                </div>
+
+                @if (randomGame.screenshots && randomGame.screenshots.length > 0) {
+                  <div class="randomGameScreenshots">
+                    @for (screenshot of randomGame.screenshots.slice(0, 3); track screenshot.id) {
+                      <img
+                        [src]="screenshot.path_thumbnail"
+                        [alt]="'Screenshot ' + screenshot.id"
+                        class="randomGameScreenshot"
+                      />
+                    }
+                  </div>
+                }
+
+                <div class="randomGameButtons">
+                  <button class="randomGameBtn hoverBtn" (click)="goToRandomGame()">
+                    Go to game →
+                  </button>
+                </div>
+              </div>
+            </div>
+          } @else {
+            <div class="randomGameEmpty">
+              <p>Click below to find a random game!</p>
+            </div>
+          }
+
+          <button
+            class="randomGameFindBtn hoverBtn"
+            (click)="getRandomGame()"
+            [disabled]="loadingRandomGame"
+          >
+            @if (loadingRandomGame) {
+              {{ currentAppId }}
+            } @else {
+              🎲 Random Game
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

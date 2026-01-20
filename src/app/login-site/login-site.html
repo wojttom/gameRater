@@ -1,0 +1,41 @@
+<div class="videoGalleryWrapper">
+  <app-vid-gallery></app-vid-gallery>
+</div>
+<div class="loginWrapper">
+  <div class="loginIslandWrapper">
+    <app-back-button label="Back" fallbackUrl="/"></app-back-button>
+    <div class="loginIsland">
+      <p class="welcome">Welcome Back, Player!</p>
+      <p class="loginMessage">Login to your account</p>
+      <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+        <input
+          type="email"
+          formControlName="email"
+          placeholder="Email"
+          class="loginInput"
+          autocomplete="email"
+        />
+        <input
+          type="password"
+          formControlName="password"
+          placeholder="Password"
+          class="loginInput"
+          autocomplete="current-password"
+        />
+        <button type="submit" class="loginButton hoverBtn">Login</button>
+      </form>
+      <div class="signupPrompt">
+        <p>Don't have an account?</p>
+        <button class="signupButton hoverBtn" (click)="onSignUp()">Sign Up</button>
+      </div>
+    </div>
+
+    <div class="popup" [class.active]="showPopup">
+      <pre class="popupText">{{ popupMessage }}</pre>
+    </div>
+  </div>
+
+  <div class="loginTextWrapper">
+    <p>Discover the best games through community reviews!</p>
+  </div>
+</div>

@@ -1,1 +1,94 @@
-/* You can add global styles to this file, and also import other style files */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inconsolata', monospace;
+}
+::-webkit-scrollbar {
+  display: none;
+}
+html {
+  min-height: 100%;
+}
+body {
+  min-height: 100vh;
+  background: linear-gradient(#232b36 10%, var(--color1) 150%);
+  background-attachment: fixed;
+}
+
+// Global hover animations
+.hoverLift {
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  }
+}
+
+.hoverGlow {
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--color1, #667eea);
+    box-shadow: 0 0 12px rgba(102, 126, 234, 0.3);
+  }
+}
+
+.hoverBrighten {
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.hoverScale {
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    transform: scale(1.02);
+  }
+}
+
+.hoverUnderline {
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// Combined hover for cards
+.hoverCard {
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: rgba(102, 126, 234, 0.5);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  }
+}
+
+// Hover for buttons
+.hoverBtn {
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    filter: brightness(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}

@@ -1,0 +1,30 @@
+.vidGallery {
+  display: flex;
+  width: calc(600px * 18);
+  animation: slide 35s linear infinite;
+}
+
+.videoWrapper {
+  flex-shrink: 0;
+  width: 600px;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+video {
+  height: 100%;
+  width: auto;
+  object-fit: contain;
+}
+
+@keyframes slide {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}

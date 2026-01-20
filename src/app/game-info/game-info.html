@@ -1,0 +1,380 @@
+@if (gameDetails) {
+  <div
+    class="gameBg"
+    [style.backgroundImage]="
+      gameDetails.background_raw ? 'url(' + gameDetails.background_raw + ')' : 'none'
+    "
+    [style.backgroundColor]="gameDetails.background_raw ? 'transparent' : '#000'"
+  ></div>
+  <div class="gameGameContainer">
+    <div class="gameTopNav">
+      <app-back-button label="Back" fallbackUrl="/"></app-back-button>
+      <button (click)="goToRawData()">Raw Data</button>
+    </div>
+    <div class="gameHeader">
+      <img class="gameHeaderImage" [src]="gameDetails.header_image" [alt]="gameDetails.name" />
+      <div class="gameHeaderInfo">
+        <h1>{{ gameDetails.name }}</h1>
+        <div class="gameTags">
+          @for (genre of gameDetails.genres; track genre.id) {
+            <span class="gameTag">{{ genre.description }}</span>
+          }
+          @for (cat of gameDetails.categories; track cat.id) {
+            <span class="gameTag secondary">{{ cat.description }}</span>
+          }
+        </div>
+        <div class="gamePlatforms">
+          @if (gameDetails.platforms.windows) {
+            <span class="gamePlatform win">Windows</span>
+          }
+          @if (gameDetails.platforms.mac) {
+            <span class="gamePlatform mac">Mac</span>
+          }
+          @if (gameDetails.platforms.linux) {
+            <span class="gamePlatform linux">Linux</span>
+          }
+        </div>
+      </div>
+      <div class="gameBuyBox">
+        @if (gameDetails.price_overview) {
+          <div class="gamePrice">
+            @if (gameDetails.price_overview.discount_percent > 0) {
+              <span class="gamePriceOld">{{ gameDetails.price_overview.initial_formatted }}</span>
+              <span class="gameDiscount">-{{ gameDetails.price_overview.discount_percent }}%</span>
+            }
+            <span class="gamePriceFinal">{{ gameDetails.price_overview.final_formatted }}</span>
+          </div>
+        } @else {
+          <div class="gamePrice">{{ gameDetails.is_free ? 'Free' : 'Unavailable' }}</div>
+        }
+        <button class="gameBuyBtn hoverBtn" (click)="openStore(gameDetails.steam_appid)">
+          Buy now
+        </button>
+        @if (gameDetails.website) {
+          <a class="gameWebsite" [href]="gameDetails.website" target="_blank">Official website</a>
+        }
+        @if (isLoggedIn) {
+          <button
+            class="gameFavoriteBtn hoverBtn"
+            [class.active]="isFavorite"
+            (click)="toggleFavorite()"
+          >
+            {{ isFavorite ? 'Favorited' : 'Add to Favorites' }}
+          </button>
+        }
+        @if (isDLC && game) {
+          <button class="gameBackToMainBtn hoverBtn" (click)="goToMainGame()">
+            ← Back to: {{ game.name }}
+          </button>
+        }
+      </div>
+    </div>
+    <div class="gameMain">
+      <div class="gameMainLeft">
+        @if (gameDetails.dlc_details && gameDetails.dlc_details.length > 0) {
+          <div class="gameSection">
+            <h2>DLC</h2>
+            <div class="gameDlcList">
+              @for (dlc of gameDetails.dlc_details; track dlc.id) {
+                <div class="gameDlcItem" (click)="window.open('/g/' + dlc.id, '_self')">
+                  <img
+                    [src]="dlc.capsule_image"
+                    [alt]="dlc.name"
+                    class="gameDlcThumb"
+                    onerror="this.style.display = 'none'"
+                  />
+                  <div>{{ dlc.name }}</div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+        <div class="gameSection">
+          <h2>About</h2>
+          <div [innerHTML]="gameDetails.about_the_game"></div>
+        </div>
+        <div class="gameSection">
+          <h2>Videos</h2>
+          @if (safeMovies.length > 0) {
+            <div class="gameMovies">
+              @for (movie of safeMovies; track movie.id) {
+                <div class="gameMovieItem">
+                  <div class="gameMovieEmbed" [innerHTML]="movie.safeHtml"></div>
+                  @if (movie.name) {
+                    <div class="gameMovieTitle">{{ movie.name }}</div>
+                  }
+                </div>
+              }
+            </div>
+          } @else {
+            <p>No videos</p>
+          }
+        </div>
+        <div class="gameSection">
+          <h2>Screenshots</h2>
+          <div class="gameScreenshots">
+            @for (item of allGalleryItems; track item.id; let i = $index) {
+              @if (item.type === 'movie') {
+                <div
+                  class="screenshotThumb movieThumb"
+                  (click)="openGallery(i)"
+                  title="Click to play"
+                >
+                  <img [src]="item.thumbnail" [alt]="item.name" />
+                  <div class="playIcon">▶</div>
+                </div>
+              } @else {
+                <img
+                  [src]="item.path_thumbnail"
+                  [alt]="'Screenshot ' + item.id"
+                  (click)="openGallery(i)"
+                  class="screenshotThumb"
+                />
+              }
+            }
+          </div>
+        </div>
+
+        @if (galleryOpen) {
+          <div class="galleryOverlay" (click)="closeGallery()" (keydown)="handleKeyPress($event)">
+            <div class="galleryContainer" (click)="$event.stopPropagation()">
+              <button class="galleryClose" (click)="closeGallery()">✕</button>
+
+              <div class="galleryContent">
+                @if (currentItemType === 'movie') {
+                  <video
+                    #videoPlayer
+                    class="galleryImage"
+                    controls
+                    controlsList="nodownload"
+                    (click)="$event.stopPropagation()"
+                  ></video>
+                } @else {
+                  <img
+                    [src]="currentScreenshot.path_full"
+                    [alt]="'Screenshot ' + currentScreenshot.id"
+                    class="galleryImage"
+                  />
+                }
+              </div>
+
+              <div class="galleryNav">
+                <button
+                  class="galleryBtn prevBtn"
+                  (click)="prevScreenshot()"
+                  [disabled]="currentScreenshotIndex === 0"
+                >
+                  ← Previous
+                </button>
+                <span class="galleryCounter"
+                  >{{ currentScreenshotIndex + 1 }} / {{ allGalleryItems.length }}</span
+                >
+                <button
+                  class="galleryBtn nextBtn"
+                  (click)="nextScreenshot()"
+                  [disabled]="currentScreenshotIndex === allGalleryItems.length - 1"
+                >
+                  Next →
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+        <div class="gameSection">
+          <h2>User Reviews</h2>
+          @if (isLoggedIn) {
+            <button class="gameReviewBtn hoverBtn" (click)="showReviewForm = !showReviewForm">
+              {{ showReviewForm ? 'Cancel' : 'Write Review' }}
+            </button>
+            @if (showReviewForm) {
+              <div class="gameReviewForm">
+                <div class="gameReviewFormGroup">
+                  <label
+                    >Rating (1-10):
+                    <input type="number" min="1" max="10" [(ngModel)]="reviewRating" />
+                  </label>
+                </div>
+                <div class="gameReviewFormGroup">
+                  <label
+                    >Your review:
+                    <textarea [(ngModel)]="reviewText" rows="5"></textarea>
+                  </label>
+                </div>
+                <button class="gameReviewSubmitBtn hoverBtn" (click)="submitReview()">
+                  Submit Review
+                </button>
+              </div>
+            }
+          }
+          @if (reviews.length > 0) {
+            <div class="gameReviewsList">
+              @for (review of reviews; track review._id) {
+                <div class="gameReviewItem">
+                  <div class="gameReviewContainer">
+                    <div class="gameReviewAvatarBox">
+                      <img
+                        class="gameReviewAvatar"
+                        [src]="
+                          review.userId?.avatarUrl ||
+                          'https://placehold.co/80x80?text=' + review.userId?.username
+                        "
+                        [alt]="review.userId?.username"
+                      />
+                    </div>
+                    <div class="gameReviewContent">
+                      <div class="gameReviewHeader">
+                        <p class="gameReviewAuthor">{{ review.userId?.username }}</p>
+                        <p class="gameReviewRating">★ {{ review.rating }}/10</p>
+                      </div>
+                      <div class="gameReviewText" [innerHTML]="review.text | markdown"></div>
+                      <div class="gameReviewFooter">
+                        <p class="gameReviewDate">{{ review.createdAt | date: 'short' }}</p>
+                        @if (isLoggedIn && currentUserId === review.userId?._id) {
+                          <button
+                            class="deleteReviewBtn hoverBtn"
+                            (click)="deleteReview(review._id)"
+                          >
+                            Delete
+                          </button>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <p>No reviews for this game</p>
+          }
+        </div>
+
+        <div class="gameSection">
+          <h2>Blog Posts About This Game</h2>
+          @if (relatedPosts.length > 0) {
+            <div class="gameBlogList">
+              @for (post of relatedPosts; track post._id) {
+                <div class="gameBlogItem hoverCard" (click)="goToPost(post)">
+                  <div class="gameBlogHeader">
+                    <h3 class="gameBlogTitle">{{ post.title }}</h3>
+                    <span class="gameBlogScore"
+                      >{{ post.score > 0 ? '+' : '' }}{{ post.score }}</span
+                    >
+                  </div>
+                  <p class="gameBlogPreview">
+                    {{ post.content | stripMarkdown: 150 }}
+                  </p>
+                  <div class="gameBlogMeta">
+                    <span class="gameBlogAuthor">by {{ post.authorId?.username }}</span>
+                    <span class="gameBlogComments">💬 {{ post.commentCount || 0 }}</span>
+                    <span class="gameBlogDate">{{ post.createdAt | date: 'short' }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <p>No blog posts about this game yet</p>
+          }
+        </div>
+      </div>
+      <div class="gameMainRight">
+        <div class="gameSection">
+          <h2>Release date</h2>
+          <div>{{ gameDetails.release_date.date || 'Unknown' }}</div>
+        </div>
+        <div class="gameSection">
+          <h2>Developers</h2>
+          <div>{{ gameDetails.developers?.join(', ') || 'None' }}</div>
+        </div>
+        <div class="gameSection">
+          <h2>Publishers</h2>
+          <div>{{ gameDetails.publishers?.join(', ') || 'None' }}</div>
+        </div>
+        <div class="gameSection">
+          <h2>Languages</h2>
+          <div [innerHTML]="gameDetails.supported_languages"></div>
+        </div>
+        @if (gameDetails.metacritic) {
+          <div class="gameSection">
+            <h2>Metacritic</h2>
+            <div>
+              <span class="gameMetacritic">{{ gameDetails.metacritic.score }}</span>
+              <a [href]="gameDetails.metacritic.url" target="_blank">See reviews</a>
+            </div>
+          </div>
+        }
+        @if (gameDetails.recommendations) {
+          <div class="gameSection">
+            <h2>Recommendations</h2>
+            <div>{{ gameDetails.recommendations.total | number }}</div>
+          </div>
+        }
+        <div class="gameSection">
+          <h2>Requirements</h2>
+          @if (gameDetails.pc_requirements) {
+            <div class="gameRequirements">
+              <div class="gameRequirementsHeader">Windows</div>
+              @if (gameDetails.pc_requirements.minimum) {
+                <div
+                  class="gameRequirementsMinimum"
+                  [innerHTML]="gameDetails.pc_requirements.minimum"
+                ></div>
+              }
+              @if (gameDetails.pc_requirements.recommended) {
+                <div
+                  class="gameRequirementsRecommended"
+                  [innerHTML]="gameDetails.pc_requirements.recommended"
+                ></div>
+              }
+            </div>
+          }
+          @if (
+            gameDetails.mac_requirements &&
+            (gameDetails.mac_requirements.minimum?.trim() ||
+              gameDetails.mac_requirements.recommended?.trim())
+          ) {
+            <div class="gameRequirements">
+              <div class="gameRequirementsHeader">Mac</div>
+              <div class="gameRequirements">
+                @if (gameDetails.mac_requirements.minimum?.trim()) {
+                  <div
+                    class="gameRequirementsMinimum"
+                    [innerHTML]="gameDetails.mac_requirements.minimum"
+                  ></div>
+                }
+                @if (gameDetails.mac_requirements.recommended?.trim()) {
+                  <div
+                    class="gameRequirementsRecommended"
+                    [innerHTML]="gameDetails.mac_requirements.recommended"
+                  ></div>
+                }
+              </div>
+            </div>
+          }
+          @if (
+            gameDetails.linux_requirements &&
+            (gameDetails.linux_requirements.minimum?.trim() ||
+              gameDetails.linux_requirements.recommended?.trim())
+          ) {
+            <div class="gameRequirements">
+              <div class="gameRequirementsHeader">Linux</div>
+              @if (gameDetails.linux_requirements.minimum) {
+                <div
+                  class="gameRequirementsMinimum"
+                  [innerHTML]="gameDetails.linux_requirements.minimum"
+                ></div>
+              }
+              @if (gameDetails.linux_requirements.recommended) {
+                <div
+                  class="gameRequirementsRecommended"
+                  [innerHTML]="gameDetails.linux_requirements.recommended"
+                ></div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="gameLoading">Loading...</div>
+}

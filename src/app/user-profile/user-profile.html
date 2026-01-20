@@ -1,0 +1,213 @@
+<div class="profileBg"></div>
+<div class="profileContainer">
+  <app-back-button label="Back" fallbackUrl="/"></app-back-button>
+
+  @if (loading) {
+    <div class="profileMain">
+      <div class="profileLoading">Loading...</div>
+    </div>
+  }
+  @if (error) {
+    <div class="profileMain">
+      <div class="profileError">{{ error }}</div>
+    </div>
+  }
+  @if (user) {
+    <div class="profileMain">
+      <div class="profileHeader">
+        <img
+          class="profileAvatar"
+          [src]="user.avatarUrl || 'https://placehold.co/400x400?text=' + user.username"
+          alt="Avatar"
+        />
+        <div class="profileInfo">
+          <h1>{{ user.username }}</h1>
+          <div class="profileMeta">
+            <span>Email: {{ user.emailPublic ? user.email : 'hidden' }}</span>
+            <span class="karmaDisplay">
+              Karma: {{ user.reputation || 0 }}
+              @if (!isCurrentUser && isLoggedIn) {
+                <span class="profileVoteButtons">
+                  <button
+                    class="voteBtn upvote"
+                    [class.active]="userVote === 1"
+                    (click)="voteOnProfile(1)"
+                    title="Upvote profile"
+                  >
+                    ▲
+                  </button>
+                  <button
+                    class="voteBtn downvote"
+                    [class.active]="userVote === -1"
+                    (click)="voteOnProfile(-1)"
+                    title="Downvote profile"
+                  >
+                    ▼
+                  </button>
+                </span>
+              }
+            </span>
+          </div>
+        </div>
+        @if (isCurrentUser) {
+          <button class="profileEditBtn hoverBtn" (click)="editMode = true">Edit Profile</button>
+        }
+      </div>
+
+      <div class="profileContent">
+        <div class="profileOverview">
+          <div class="profileSection">
+            <h2>Favorite Games</h2>
+            @if (user.favorites?.length) {
+              <div class="profileGames">
+                @for (game of user.favorites; track game.appid) {
+                  <div class="profileGameItem hoverLift" (click)="goToGame(game.appid)">
+                    <img [src]="getGameImageUrl(game)" [alt]="game.name" />
+                    <div>{{ game.name }}</div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="emptyText">No favorite games.</p>
+            }
+          </div>
+
+          <div class="profileSection">
+            <h2>Added Games</h2>
+            @if (user.addedGames?.length) {
+              <div class="profileGames">
+                @for (game of user.addedGames; track game._id) {
+                  <div class="profileGameItem hoverLift" (click)="goToGame(game.appid)">
+                    <img [src]="getGameImageUrl(game)" [alt]="game.name" />
+                    <div>{{ game.name }}</div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="emptyText">No added games.</p>
+            }
+          </div>
+
+          <div class="profileSection">
+            <h2>User Reviews</h2>
+            @if (userReviews.length) {
+              <div class="profileReviews">
+                @for (review of userReviews; track review._id) {
+                  <div class="profileReviewItem">
+                    <div class="profileReviewContainer">
+                      <div
+                        class="profileReviewCapsuleBox hoverLift"
+                        (click)="goToGame(review.gameAppId)"
+                      >
+                        <img
+                          class="profileReviewCapsule"
+                          [src]="
+                            'https://cdn.cloudflare.steamstatic.com/steam/apps/' +
+                            review.gameAppId +
+                            '/capsule_184x69.jpg'
+                          "
+                          [alt]="review.gameName"
+                        />
+                      </div>
+                      <div class="profileReviewContent">
+                        <div class="profileReviewHeader">
+                          <p
+                            class="profileReviewGame hoverUnderline"
+                            (click)="goToGame(review.gameAppId)"
+                          >
+                            {{ review.gameName }}
+                          </p>
+                          <p class="profileReviewRating">★ {{ review.rating }}/10</p>
+                        </div>
+                        <div class="profileReviewText" [innerHTML]="review.text | markdown"></div>
+                        <div class="profileReviewFooter">
+                          <p class="profileReviewDate">{{ review.createdAt | date: 'short' }}</p>
+                          @if (isCurrentUser) {
+                            <button
+                              class="deleteReviewBtn hoverBtn"
+                              (click)="deleteReview(review._id)"
+                            >
+                              Delete
+                            </button>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="emptyText">No reviews.</p>
+            }
+          </div>
+        </div>
+
+        <div class="profileBlog">
+          <div class="blogHeader">
+            <h2>Blog Posts</h2>
+            @if (isCurrentUser) {
+              <button class="newPostBtn hoverBtn" (click)="showPostEditor = true">
+                + New Post
+              </button>
+            }
+          </div>
+
+          @if (showPostEditor) {
+            <app-post-editor
+              (postCreated)="onPostCreated($event)"
+              (cancelled)="showPostEditor = false"
+            ></app-post-editor>
+          }
+          @if (userPosts.length) {
+            <div class="postsList">
+              @for (post of userPosts; track post._id) {
+                <app-post-card [post]="post"></app-post-card>
+              }
+            </div>
+            @if (hasMorePosts) {
+              <button class="loadMoreBtn" (click)="loadMorePosts()" [disabled]="loadingPosts">
+                {{ loadingPosts ? 'Loading...' : 'Load more posts' }}
+              </button>
+            }
+          } @else if (!showPostEditor) {
+            <p class="emptyText">No blog posts yet.</p>
+          }
+        </div>
+      </div>
+    </div>
+
+    @if (editMode) {
+      <div class="profileEditOverlay" (click)="editMode = false"></div>
+      <div class="profileEditForm">
+        <form (ngSubmit)="saveEdit()">
+          @if (editError) {
+            <div class="profileEditError">{{ editError }}</div>
+          }
+          <label>
+            Avatar (URL):
+            <input type="text" [(ngModel)]="editUser.avatar" name="avatar" />
+          </label>
+          <label>
+            E-mail:
+            <input type="email" [(ngModel)]="editUser.email" name="email" />
+          </label>
+          <label class="emailPublicToggle">
+            Show email publicly
+            <input type="checkbox" [(ngModel)]="editUser.emailPublic" name="emailPublic" />
+          </label>
+          <label>
+            New Password:
+            <input type="password" [(ngModel)]="editUser.password" name="password" />
+          </label>
+          <button type="submit" class="profileEditSaveBtn hoverBtn">Save</button>
+          <button type="button" (click)="deleteAccount()" class="profileEditDeleteBtn hoverBtn">
+            Usuń konto
+          </button>
+          <button type="button" (click)="editMode = false" class="profileEditCancelBtn hoverBtn">
+            Cancel
+          </button>
+        </form>
+      </div>
+    }
+  }
+</div>

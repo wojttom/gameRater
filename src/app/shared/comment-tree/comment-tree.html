@@ -1,0 +1,109 @@
+<div class="commentTree">
+  @for (comment of comments; track comment._id) {
+    <div class="commentItem" [style.margin-left.px]="getIndent(depth)">
+      <button
+        class="collapseBtn"
+        (click)="toggleCollapse(comment._id)"
+        [title]="isCollapsed(comment._id) ? 'Expand' : 'Collapse'"
+      >
+        {{ isCollapsed(comment._id) ? '[+]' : '[-]' }}
+      </button>
+
+      <div class="commentMain" [class.collapsed]="isCollapsed(comment._id)">
+        <div class="commentHeader">
+          <a
+            class="commentAvatar hoverLift"
+            [href]="'/u/' + (comment.authorId?.username ? comment.authorId.username : '')"
+          >
+            @if (comment.authorId?.avatarUrl) {
+              <img [src]="comment.authorId.avatarUrl" [alt]="comment.authorId.username" />
+            } @else {
+              <span class="avatarPlaceholder">👤</span>
+            }
+          </a>
+          <a
+            class="commentAuthor hoverUnderline"
+            [href]="'/u/' + (comment.authorId?.username ? comment.authorId.username : '')"
+            >{{ comment.authorId?.username }}</a
+          >
+          <span class="commentDate">{{ comment.createdAt | date: 'short' }}</span>
+          @if (comment.isEdited) {
+            <span class="commentEdited">(edited)</span>
+          }
+        </div>
+
+        @if (!isCollapsed(comment._id)) {
+          @if (editingComment === comment._id) {
+            <app-comment-form
+              [editMode]="true"
+              [existingComment]="comment"
+              (commentUpdated)="onCommentUpdated($event)"
+              (cancelled)="cancelEdit()"
+            ></app-comment-form>
+          } @else {
+            <div class="commentContent" [innerHTML]="comment.content | markdown"></div>
+
+            <div class="commentActions">
+              <app-vote-buttons
+                [targetType]="'comment'"
+                [targetId]="comment._id"
+                [upvotes]="comment.upvotes"
+                [downvotes]="comment.downvotes"
+                [score]="comment.score"
+                [userVote]="comment.userVote"
+                [vertical]="false"
+              ></app-vote-buttons>
+
+              <button
+                class="actionBtn"
+                (click)="startReply(comment._id)"
+                [disabled]="!currentUserId"
+                [title]="!currentUserId ? 'Log in to reply' : 'Reply'"
+              >
+                Reply
+              </button>
+
+              @if (canEdit(comment)) {
+                <button class="actionBtn" (click)="startEdit(comment._id)">
+                  Edit
+                  <span class="editTimer">{{ getTimeRemaining(comment.editableUntil) }}</span>
+                </button>
+              }
+              @if (canDelete(comment)) {
+                <button class="actionBtn delete" (click)="deleteComment(comment._id)">
+                  Delete
+                </button>
+              }
+            </div>
+
+            @if (replyingTo === comment._id) {
+              <app-comment-form
+                [parentType]="'comment'"
+                [parentId]="comment._id"
+                [rootId]="rootId"
+                [rootType]="rootType"
+                (commentCreated)="onReplyCreated($event)"
+                (cancelled)="cancelReply()"
+              ></app-comment-form>
+            }
+          }
+          @if (comment.replies?.length) {
+            <app-comment-tree
+              [comments]="comment.replies"
+              [rootId]="rootId"
+              [rootType]="rootType"
+              [currentUserId]="currentUserId"
+              [depth]="depth + 1"
+              (commentAdded)="commentAdded.emit($event)"
+              (commentDeleted)="commentDeleted.emit($event)"
+            ></app-comment-tree>
+          }
+        } @else {
+          <span class="collapsedInfo">
+            {{ comment.replyCount }} {{ comment.replyCount === 1 ? 'reply' : 'replies' }} hidden
+          </span>
+        }
+      </div>
+    </div>
+  }
+</div>

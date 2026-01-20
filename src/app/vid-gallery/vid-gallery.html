@@ -1,0 +1,7 @@
+<div class="vidGallery" (contextmenu)="$event.preventDefault()">
+    @for (video of duplicatedVideos; let i = $index; track i) {
+        <div class="videoWrapper">
+            <video [src]="video.url" [muted]="'muted'" [autoplay]="'autoplay'" (loadedmetadata)="videoOptions($event, video)" (timeupdate)="checkEndTime($event, video)"></video>
+        </div>
+    }
+</div>

@@ -1,0 +1,92 @@
+<div class="postEditor">
+  <h3 class="editorTitle">{{ editMode ? 'Edit Post' : 'Create New Post' }}</h3>
+
+  @if (error) {
+    <div class="editorError">{{ error }}</div>
+  }
+
+  <div class="editorField">
+    <label for="postTitle">Title</label>
+    <input
+      id="postTitle"
+      type="text"
+      [(ngModel)]="title"
+      placeholder="Enter post title..."
+      maxlength="200"
+      [disabled]="isSubmitting"
+    />
+    <span class="charCount">{{ title.length }}/200</span>
+  </div>
+
+  <div class="editorField">
+    <label for="postContent">Content</label>
+    <textarea
+      id="postContent"
+      [(ngModel)]="content"
+      placeholder="Write your post..."
+      rows="8"
+      maxlength="10000"
+      [disabled]="isSubmitting"
+    ></textarea>
+    <span class="charCount">{{ content.length }}/10000</span>
+  </div>
+
+  <div class="editorField">
+    <label>Mentioned Games</label>
+    <div class="gameSearch">
+      <input
+        type="text"
+        [(ngModel)]="gameSearchQuery"
+        (input)="searchGames()"
+        placeholder="Search for games to mention..."
+        [disabled]="isSubmitting"
+      />
+      @if (isSearching) {
+        <span class="searching">Searching...</span>
+      }
+    </div>
+
+    @if (gameSearchResults.length) {
+      <div class="searchResults">
+        @for (game of gameSearchResults; track game.appid) {
+          <div
+            class="searchResult"
+            [style.backgroundImage]="game.tiny_image ? 'url(' + game.tiny_image + ')' : 'none'"
+            (click)="addGame(game)"
+          >
+            <div class="resultContent">
+              <span class="resultName">{{ game.name }}</span>
+              @if (game.price) {
+                <span class="resultPrice">
+                  {{ game.price.final / 100 }} {{ game.price.currency }}
+                </span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+    @if (mentionedGames.length) {
+      <div class="mentionedGames">
+        @for (game of mentionedGames; track game.appid) {
+          <span class="gameTag">
+            @if (game.tiny_image) {
+              <img [src]="game.tiny_image" alt="" class="tagImage" />
+            }
+            {{ game.name }}
+            <button type="button" (click)="removeGame(game.appid)">×</button>
+          </span>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="editorActions">
+    <button class="btnCancel" type="button" (click)="cancel()" [disabled]="isSubmitting">
+      Cancel
+    </button>
+    <button class="btnSubmit" type="button" (click)="submit()" [disabled]="isSubmitting">
+      {{ isSubmitting ? 'Saving...' : editMode ? 'Update Post' : 'Create Post' }}
+    </button>
+  </div>
+</div>

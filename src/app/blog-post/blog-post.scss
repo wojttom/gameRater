@@ -1,0 +1,287 @@
+.postBg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: transparent;
+  pointer-events: none;
+}
+
+.postContainer {
+  position: relative;
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 32px 24px 64px 24px;
+  color: #eaeef2;
+  font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  z-index: 1;
+}
+
+.postLoading,
+.postError {
+  font-size: 1.3rem;
+  text-align: center;
+  margin: 32px 0;
+  color: var(--color3);
+}
+
+.postMain {
+  background: rgba(24, 28, 36);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.3);
+  padding: 32px;
+}
+
+.postHeader {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.postVote {
+  flex-shrink: 0;
+}
+
+.postInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.postTitle {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #eaeef2;
+  margin: 0 0 12px 0;
+  word-break: break-word;
+}
+
+.postMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.95rem;
+}
+
+.postAuthorAvatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: rgba(35, 43, 54, 0.8);
+  border: 2px solid var(--color1);
+  flex-shrink: 0;
+  cursor: pointer;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .avatarPlaceholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    background: rgba(35, 43, 54, 0.8);
+  }
+}
+
+.postAuthor {
+  color: var(--color2);
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.postDate {
+  color: #6b7c93;
+}
+
+.postEdited {
+  font-style: italic;
+  color: #6b7c93;
+}
+
+.postMentions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 12px;
+  background: color-mix(in srgb, var(--color1) 30%, transparent);
+  border-radius: 8px;
+}
+
+.mentionsLabel {
+  color: #a3b3c1;
+  font-size: 0.9rem;
+}
+
+.mentionBadge {
+  background: var(--color1);
+  color: var(--color3);
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: color-mix(in srgb, var(--color3) 40%, transparent);
+  }
+}
+
+.postContent {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: white;
+  word-break: break-word;
+  margin-bottom: 24px;
+
+  // Markdown styles
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin: 1em 0 0.5em 0;
+    color: #fff;
+  }
+
+  h1 {
+    font-size: 1.6rem;
+  }
+  h2 {
+    font-size: 1.4rem;
+  }
+  h3 {
+    font-size: 1.2rem;
+  }
+
+  p {
+    margin: 0 0 1em 0;
+  }
+
+  a {
+    color: var(--color2);
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  code {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9em;
+  }
+
+  pre {
+    background: rgba(0, 0, 0, 0.4);
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+
+    code {
+      background: none;
+      padding: 0;
+    }
+  }
+
+  blockquote {
+    border-left: 3px solid var(--color2);
+    margin: 1em 0;
+    padding-left: 16px;
+    color: #a3b3c1;
+    font-style: italic;
+  }
+
+  ul,
+  ol {
+    margin: 1em 0;
+    padding-left: 24px;
+  }
+
+  li {
+    margin: 0.5em 0;
+  }
+
+  img {
+    max-width: 100%;
+    border-radius: 8px;
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    margin: 1.5em 0;
+  }
+}
+
+.postActions {
+  display: flex;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.actionBtn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #a3b3c1;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  &.delete:hover {
+    background: color-mix(in srgb, var(--color4) 20%, transparent);
+    color: var(--color4);
+  }
+
+  .editTimer {
+    font-size: 0.8rem;
+    color: var(--color3);
+    margin-left: 6px;
+  }
+}
+
+.commentsSection {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.commentsTitle {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--color2);
+  margin: 0 0 20px 0;
+}
+
+.commentsList {
+  margin-top: 20px;
+}
+
+.noComments {
+  color: #6b7c93;
+  font-style: italic;
+  text-align: center;
+  padding: 32px 0;
+}

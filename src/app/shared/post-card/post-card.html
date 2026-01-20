@@ -1,0 +1,43 @@
+<div class="postCard hoverCard" (click)="goToPost()">
+  <div class="postVote">
+    <app-vote-buttons
+      [targetType]="'post'"
+      [targetId]="post._id"
+      [upvotes]="post.upvotes"
+      [downvotes]="post.downvotes"
+      [score]="post.score"
+      [userVote]="post.userVote"
+      (click)="$event.stopPropagation()"
+    ></app-vote-buttons>
+  </div>
+
+  <div class="postContent">
+    <h3 class="postTitle">{{ post.title }}</h3>
+
+    <p class="postPreview">
+      {{ post.content | stripMarkdown: 150 }}
+    </p>
+
+    @if (post.mentionedGames?.length) {
+      <div class="postMentions">
+        <span class="mentionsLabel">🎮</span>
+        @for (game of post.mentionedGames; track game.appid) {
+          <app-game-badge [game]="game" [stopPropagation]="true"></app-game-badge>
+        }
+      </div>
+    }
+
+    <div class="postMeta">
+      @if (showAuthor && post.authorId?.username) {
+        <span class="postAuthor hoverUnderline" (click)="goToAuthor(); $event.stopPropagation()">
+          by {{ post.authorId.username }}
+        </span>
+      }
+      <span class="postComments">💬 {{ post.commentCount || 0 }}</span>
+      <span class="postDate">{{ post.createdAt | date: 'short' }}</span>
+      @if (post.isEdited) {
+        <span class="postEdited">(edited)</span>
+      }
+    </div>
+  </div>
+</div>

@@ -1,0 +1,36 @@
+<div class="commentForm">
+  @if (!isLoggedIn) {
+    <div class="notLoggedIn">
+      <span>Log in to write comments</span>
+    </div>
+  } @else {
+    @if (error) {
+      <div class="formError">{{ error }}</div>
+    }
+
+    <textarea
+      [(ngModel)]="content"
+      placeholder="{{ editMode ? 'Edit your comment...' : 'Write a comment...' }}"
+      rows="3"
+      maxlength="5000"
+      [disabled]="isSubmitting"
+    ></textarea>
+
+    <div class="formActions">
+      <span class="charCount">{{ content.length }}/5000</span>
+      <div class="formButtons">
+        <button class="btnCancel" type="button" (click)="cancel()" [disabled]="isSubmitting">
+          Cancel
+        </button>
+        <button
+          class="btnSubmit"
+          type="button"
+          (click)="submit()"
+          [disabled]="isSubmitting || !content.trim()"
+        >
+          {{ isSubmitting ? 'Saving...' : editMode ? 'Update' : 'Comment' }}
+        </button>
+      </div>
+    </div>
+  }
+</div>

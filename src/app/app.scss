@@ -1,0 +1,407 @@
+@property --color1 {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: rgb(84, 240, 79);
+}
+
+@property --color2 {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: #4a9eff;
+}
+
+@property --color3 {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: #ff7e5f;
+}
+
+@property --color4 {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: #d9534f;
+}
+
+// ==================== NAVBAR ====================
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 24px;
+  background: rgba(20, 20, 35, 0.95);
+  backdrop-filter: blur(12px);
+  color: #fff;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+// Nav sections
+.navLeft {
+  display: flex;
+  align-items: center;
+}
+
+.navCenter {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  max-width: 600px;
+}
+
+.navRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+// ==================== BRAND ====================
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .brandIcon {
+    font-size: 24px;
+  }
+
+  .brandText {
+    font-size: 18px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #4a9eff, #a855f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+// ==================== SEARCH ====================
+.search {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  position: relative;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 0 16px;
+  transition: all 0.2s ease;
+
+  &:focus-within {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: var(--color2);
+    box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.15);
+  }
+
+  .searchIcon {
+    font-size: 16px;
+    opacity: 0.6;
+    margin-right: 10px;
+  }
+
+  input {
+    flex: 1;
+    padding: 12px 0;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 14px;
+    outline: none;
+    min-width: 200px;
+
+    &::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+  }
+}
+
+.searchResultsPopup {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 100%;
+  background: rgba(25, 25, 40, 0.98);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  z-index: 1000;
+  max-height: 400px;
+  overflow-y: auto;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+  }
+}
+
+.searchItem {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100px;
+  cursor: pointer;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &.loading {
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.5);
+    font-style: italic;
+    cursor: default;
+    height: 60px;
+  }
+}
+
+.searchContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 12px 16px;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.4) 100%);
+  width: 100%;
+  height: 100%;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: linear-gradient(90deg, rgba(74, 158, 255, 0.3) 0%, rgba(0, 0, 0, 0.4) 100%);
+  }
+}
+
+.searchName {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.searchPrice {
+  font-size: 0.9rem;
+  color: #4ade80;
+  margin-top: 4px;
+}
+
+// ==================== NAV ICON BUTTONS ====================
+.navIconBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #fff;
+
+  span {
+    font-size: 18px;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// ==================== USER MENU ====================
+.userWrap {
+  position: relative;
+}
+
+.avatarBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, #4a9eff, #a855f7);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  overflow: hidden;
+
+  .avatarIcon {
+    font-size: 20px;
+  }
+
+  .avatarImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &:hover {
+    transform: scale(1.08);
+    box-shadow: 0 4px 15px rgba(74, 158, 255, 0.4);
+  }
+}
+
+.loginBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: linear-gradient(135deg, #4a9eff, #a855f7);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(74, 158, 255, 0.4);
+  }
+}
+
+.userMenu {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  min-width: 200px;
+  background: rgba(25, 25, 40, 0.98);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  z-index: 9999;
+  animation: menuSlide 0.2s ease;
+}
+
+@keyframes menuSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.userMenuHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.05);
+
+  .userMenuAvatar {
+    font-size: 28px;
+  }
+
+  .userMenuAvatarImg {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .userMenuName {
+    font-weight: 600;
+    color: #fff;
+  }
+}
+
+.userMenuDivider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.userMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 14px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+
+  .menuIcon {
+    font-size: 16px;
+    opacity: 0.7;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+  }
+
+  &.logout {
+    color: #f87171;
+
+    &:hover {
+      background: rgba(248, 113, 113, 0.15);
+    }
+  }
+}
+
+// ==================== RESPONSIVE ====================
+@media (max-width: 768px) {
+  .navbar {
+    padding: 10px 16px;
+    gap: 12px;
+  }
+
+  .brand .brandText {
+    display: none;
+  }
+
+  .navCenter {
+    flex: 1;
+  }
+
+  .search input {
+    min-width: 120px;
+  }
+
+  .navIconBtn {
+    width: 38px;
+    height: 38px;
+
+    span {
+      font-size: 16px;
+    }
+  }
+}

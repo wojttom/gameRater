@@ -1,0 +1,119 @@
+.commentForm {
+  margin-top: 12px;
+  padding: 12px;
+  background: rgba(24, 28, 36, 0.6);
+  border-radius: 8px;
+}
+
+.formError {
+  background: color-mix(in srgb, var(--color4) 20%, transparent);
+  border: 1px solid var(--color4);
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: var(--color4);
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+
+textarea {
+  width: 100%;
+  background: #232b36;
+  border: 2px solid #2a3f5f;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 0.95rem;
+  color: #eaeef2;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+
+  &:focus {
+    outline: none;
+    border-color: var(--color2);
+  }
+
+  &::placeholder {
+    color: #6b7c93;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+  }
+}
+
+.formActions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.charCount {
+  font-size: 0.8rem;
+  color: #6b7c93;
+}
+
+.formButtons {
+  display: flex;
+  gap: 8px;
+}
+
+.btnCancel,
+.btnSubmit {
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btnCancel {
+  background: transparent;
+  color: #a3b3c1;
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.btnSubmit {
+  background: var(--color2);
+  color: #1b2838;
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+}
+
+.notLoggedIn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: #a3b3c1;
+  font-size: 0.95rem;
+
+  .loginLink {
+    color: var(--color2);
+    text-decoration: none;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 6px;
+    background: rgba(102, 126, 234, 0.15);
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(102, 126, 234, 0.25);
+    }
+  }
+}

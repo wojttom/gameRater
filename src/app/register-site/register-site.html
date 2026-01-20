@@ -1,0 +1,46 @@
+<div class="videoGalleryWrapper">
+  <app-vid-gallery></app-vid-gallery>
+</div>
+<div class="registerWrapper">
+  <div class="registerIslandWrapper">
+    <app-back-button label="Back" fallbackUrl="/"></app-back-button>
+    <div class="registerIsland">
+      <p class="welcome">Join the Game Community!</p>
+      <p class="registerMessage">Create your account</p>
+      <form [formGroup]="registerForm" (ngSubmit)="onRegister()">
+        <input type="email" formControlName="email" placeholder="Email" class="registerInput" />
+        <input
+          type="text"
+          formControlName="username"
+          placeholder="Username"
+          class="registerInput"
+        />
+        <input
+          type="password"
+          formControlName="password"
+          placeholder="Password"
+          class="registerInput"
+        />
+        <input
+          type="password"
+          formControlName="confirmPassword"
+          placeholder="Confirm Password"
+          class="registerInput"
+        />
+        <button type="submit" class="registerButton hoverBtn">Register</button>
+      </form>
+      <div class="signupPrompt">
+        <p>Already have an account?</p>
+        <button class="signupButton hoverBtn" (click)="onLogin()">Login</button>
+      </div>
+    </div>
+
+    <div class="popup" [class.active]="showPopup">
+      <pre class="popupText">{{ popupMessage }}</pre>
+    </div>
+  </div>
+
+  <div class="registerTextWrapper">
+    <p>Discover the best games through community reviews!</p>
+  </div>
+</div>

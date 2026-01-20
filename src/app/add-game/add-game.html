@@ -1,0 +1,494 @@
+<div class="addGameWrapper">
+  <div class="addGameContainer">
+    <app-back-button label="Back" fallbackUrl="/"></app-back-button>
+
+    <div class="addGameHeader">
+      <h1>Add New Game</h1>
+      <p>Share your game with the community</p>
+    </div>
+
+    @if (success) {
+      <div class="successMessage">
+        <p>{{ successMessage }}</p>
+        <p>Redirecting to your game...</p>
+      </div>
+    }
+    @if (error) {
+      <div class="errorMessage">{{ error }}</div>
+    }
+
+    <form [formGroup]="gameForm" (ngSubmit)="submitGame()" class="addGameForm">
+      <div class="formSection">
+        <h2>Basic Information</h2>
+
+        <div class="formGroup">
+          <label>Game Name *</label>
+          <input
+            type="text"
+            formControlName="name"
+            placeholder="Enter game name"
+            class="formInput"
+          />
+          @if (gameForm.get('name')?.hasError('required')) {
+            <span class="error">Name is required</span>
+          }
+        </div>
+
+        <div class="formRow">
+          <div class="formGroup">
+            <label>Type *</label>
+            <select formControlName="type" class="formInput">
+              <option value="video_game">Video Game</option>
+              <option value="card_game">Card Game</option>
+              <option value="board_game">Board Game</option>
+              <option value="dlc_expansion">DLC/Expansion Pack</option>
+            </select>
+          </div>
+
+          <div class="formGroup">
+            <label>Required Age</label>
+            <input type="number" formControlName="required_age" class="formInput" />
+          </div>
+        </div>
+
+        @if (gameForm.get('type')?.value === 'video_game') {
+          <div class="platformsGroup">
+            <label style="width: 100%; margin-bottom: 10px">Platforms</label>
+            <div class="platformWrapper">
+              <div class="platformCheckbox">
+                <input type="checkbox" formControlName="platforms_windows" id="windows" />
+                <label for="windows">Windows</label>
+              </div>
+              <div class="platformCheckbox">
+                <input type="checkbox" formControlName="platforms_mac" id="mac" />
+                <label for="mac">macOS</label>
+              </div>
+              <div class="platformCheckbox">
+                <input type="checkbox" formControlName="platforms_linux" id="linux" />
+                <label for="linux">Linux</label>
+              </div>
+            </div>
+          </div>
+        }
+
+        <div class="formGroup">
+          <label>Short Description *</label>
+          <textarea
+            formControlName="short_description"
+            placeholder="Brief description"
+            class="formInput"
+            rows="2"
+          ></textarea>
+        </div>
+
+        <div class="formGroup">
+          <label>About the Game *</label>
+          <textarea
+            formControlName="about_the_game"
+            placeholder="Detailed game description"
+            class="formInput"
+            rows="4"
+          ></textarea>
+        </div>
+
+        <div class="formGroup">
+          <label>Detailed Description</label>
+          <textarea
+            formControlName="detailed_description"
+            placeholder="Extended description"
+            class="formInput"
+            rows="4"
+          ></textarea>
+        </div>
+
+        <div class="formGroup">
+          <label>Website</label>
+          <input
+            type="url"
+            formControlName="website"
+            placeholder="https://example.com"
+            class="formInput"
+          />
+        </div>
+      </div>
+
+      <div class="formSection">
+        <h2>Images</h2>
+
+        <div class="formGroup">
+          <label>Header Image URL</label>
+          <p class="formHint">Main banner displayed at the top of your game page</p>
+          <input
+            type="url"
+            formControlName="header_image"
+            placeholder="https://example.com/header.jpg"
+            class="formInput"
+          />
+          @if (gameForm.get('header_image')?.value) {
+            <div class="imagePreview" style="margin-top: 15px">
+              <img
+                class="previewImage"
+                [src]="gameForm.get('header_image')?.value"
+                alt="Header preview"
+              />
+            </div>
+          }
+        </div>
+
+        <div class="formGroup">
+          <label>Capsule Image URL</label>
+          <p class="formHint">Game cover shown in game library and search results</p>
+          <input
+            type="url"
+            formControlName="capsule_image"
+            placeholder="https://example.com/capsule.jpg"
+            class="formInput"
+          />
+          @if (gameForm.get('capsule_image')?.value) {
+            <div class="imagePreview" style="margin-top: 15px">
+              <img
+                class="previewImage"
+                [src]="gameForm.get('capsule_image')?.value"
+                alt="Capsule preview"
+              />
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="formSection">
+        <h2>Pricing</h2>
+
+        <div class="formRow">
+          <div class="formGroup">
+            <label>
+              <input type="checkbox" formControlName="is_free" />
+              Free to Play
+            </label>
+          </div>
+        </div>
+
+        @if (!gameForm.get('is_free')?.value) {
+          <div class="formRow">
+            <div class="formGroup">
+              <label>Currency</label>
+              <select formControlName="price_currency" class="formInput">
+                <option value="USD">USD $</option>
+                <option value="EUR">EUR €</option>
+                <option value="GBP">GBP £</option>
+                <option value="PLN">PLN zł</option>
+              </select>
+            </div>
+
+            <div class="formGroup">
+              <label>Price</label>
+              <input
+                type="number"
+                formControlName="price_final"
+                step="0.01"
+                placeholder="9.99"
+                class="formInput"
+              />
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="formSection">
+        <h2>Release Information</h2>
+
+        <div class="formRow">
+          <div class="formGroup">
+            <label>Release Date</label>
+            <input type="date" formControlName="release_date" class="formInput" />
+          </div>
+
+          <div class="formGroup">
+            <label>
+              <input type="checkbox" formControlName="coming_soon" />
+              Coming Soon
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="formSection">
+        <h2>System Requirements</h2>
+
+        @if (
+          gameForm.get('type')?.value === 'video_game' ||
+          gameForm.get('type')?.value === 'dlc_expansion'
+        ) {
+          @if (
+            gameForm.get('platforms_windows')?.value ||
+            gameForm.get('platforms_mac')?.value ||
+            gameForm.get('platforms_linux')?.value
+          ) {
+            <div class="requirementsContainer">
+              @if (gameForm.get('platforms_windows')?.value) {
+                <div class="requirementsSubsection">
+                  <h3>Windows</h3>
+                  <div class="formGroup">
+                    <label>Minimum</label>
+                    <textarea
+                      formControlName="pc_minimum"
+                      placeholder="Minimum system requirements"
+                      class="formInput"
+                      rows="3"
+                    ></textarea>
+                  </div>
+                  <div class="formGroup">
+                    <label>Recommended</label>
+                    <textarea
+                      formControlName="pc_recommended"
+                      placeholder="Recommended system requirements"
+                      class="formInput"
+                      rows="3"
+                    ></textarea>
+                  </div>
+                </div>
+              }
+              @if (gameForm.get('platforms_mac')?.value) {
+                <div class="requirementsSubsection">
+                  <h3>macOS</h3>
+                  <div class="formGroup">
+                    <label>Minimum</label>
+                    <textarea
+                      formControlName="mac_minimum"
+                      placeholder="Minimum system requirements"
+                      class="formInput"
+                      rows="3"
+                    ></textarea>
+                  </div>
+                  <div class="formGroup">
+                    <label>Recommended</label>
+                    <textarea
+                      formControlName="mac_recommended"
+                      placeholder="Recommended system requirements"
+                      class="formInput"
+                      rows="3"
+                    ></textarea>
+                  </div>
+                </div>
+              }
+              @if (gameForm.get('platforms_linux')?.value) {
+                <div class="requirementsSubsection">
+                  <h3>Linux</h3>
+                  <div class="formGroup">
+                    <label>Minimum</label>
+                    <textarea
+                      formControlName="linux_minimum"
+                      placeholder="Minimum system requirements"
+                      class="formInput"
+                      rows="3"
+                    ></textarea>
+                  </div>
+                  <div class="formGroup">
+                    <label>Recommended</label>
+                    <textarea
+                      formControlName="linux_recommended"
+                      placeholder="Recommended system requirements"
+                      class="formInput"
+                      rows="3"
+                    ></textarea>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="formGroup" style="color: #999; text-align: center; padding: 20px">
+              <p>Select at least one platform to add system requirements</p>
+            </div>
+          }
+        } @else {
+          <div class="formGroup">
+            <label>Requirements</label>
+            <textarea
+              formControlName="requirements"
+              placeholder="Game requirements or specifications"
+              class="formInput"
+              rows="4"
+            ></textarea>
+          </div>
+        }
+      </div>
+
+      <div class="formSection">
+        <h2>Developers & Publishers</h2>
+
+        <div class="formGroup">
+          <label>Developers</label>
+          <div class="tagInput">
+            <input
+              class="formInput"
+              type="text"
+              [(ngModel)]="newDeveloper"
+              [ngModelOptions]="{ standalone: true }"
+              placeholder="Enter developer name"
+              (keyup.enter)="addDeveloper()"
+            />
+            <button type="button" (click)="addDeveloper()" class="addBtn hoverBtn">Add</button>
+          </div>
+          <div class="tags">
+            @for (dev of developers; track $index) {
+              <div class="tag">
+                {{ dev }}
+                <button type="button" (click)="removeDeveloper($index)" class="removeBtn hoverBtn">
+                  x
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="formGroup">
+          <label>Publishers</label>
+          <div class="tagInput">
+            <input
+              class="formInput"
+              type="text"
+              [(ngModel)]="newPublisher"
+              [ngModelOptions]="{ standalone: true }"
+              placeholder="Enter publisher name"
+              (keyup.enter)="addPublisher()"
+            />
+            <button type="button" (click)="addPublisher()" class="addBtn hoverBtn">Add</button>
+          </div>
+          <div class="tags">
+            @for (pub of publishers; track $index) {
+              <div class="tag">
+                {{ pub }}
+                <button type="button" (click)="removePublisher($index)" class="removeBtn hoverBtn">
+                  x
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="formSection">
+        <h2>Categories & Genres</h2>
+
+        <div class="formGroup">
+          <label>Categories</label>
+          <div class="tagInputRow">
+            <input
+              class="formInput"
+              type="text"
+              [(ngModel)]="newCategory.description"
+              [ngModelOptions]="{ standalone: true }"
+              placeholder="Category name"
+            />
+            <button type="button" (click)="addCategory()" class="addBtn hoverBtn">Add</button>
+          </div>
+          <div class="tags">
+            @for (cat of categories; track $index) {
+              <div class="tag">
+                {{ cat.description }}
+                <button type="button" (click)="removeCategory($index)" class="removeBtn hoverBtn">
+                  x
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="formGroup">
+          <label>Genres</label>
+          <div class="tagInputRow">
+            <input
+              class="formInput"
+              type="text"
+              [(ngModel)]="newGenre.description"
+              [ngModelOptions]="{ standalone: true }"
+              placeholder="Genre name"
+            />
+            <button type="button" (click)="addGenre()" class="addBtn hoverBtn">Add</button>
+          </div>
+          <div class="tags">
+            @for (genre of genres; track $index) {
+              <div class="tag">
+                {{ genre.description }}
+                <button type="button" (click)="removeGenre($index)" class="removeBtn hoverBtn">
+                  x
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="formSection">
+        <h2>Screenshots</h2>
+
+        <div class="formGroup">
+          <label>Add Screenshot</label>
+          <div class="screenshotInput">
+            <input
+              type="url"
+              [(ngModel)]="newScreenshot"
+              [ngModelOptions]="{ standalone: true }"
+              placeholder="Image URL"
+              class="formInput"
+            />
+            <button type="button" (click)="addScreenshot()" class="addBtn hoverBtn">
+              Add Screenshot
+            </button>
+          </div>
+        </div>
+
+        <div class="screenshotsList">
+          @for (screenshot of screenshots; track $index) {
+            <div class="screenshotItem">
+              <img [src]="screenshot.path_thumbnail" alt="Screenshot" />
+              <button type="button" (click)="removeScreenshot($index)" class="removeBtn hoverBtn">
+                Remove
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="formSection">
+        <h2>Movies/Videos</h2>
+
+        <div class="formGroup">
+          <label>Add Video</label>
+          <p class="formHint">Paste the YouTube embedded iframe code</p>
+          <div class="movieInput">
+            <textarea
+              [(ngModel)]="newMovie"
+              [ngModelOptions]="{ standalone: true }"
+              placeholder='<iframe src="https://www.youtube.com/embed/..." ...></iframe>'
+              class="formInput"
+              rows="3"
+            ></textarea>
+            <button type="button" (click)="addMovie()" class="addBtn hoverBtn">Add Video</button>
+          </div>
+        </div>
+
+        <div class="moviesList">
+          @for (movie of movies; track $index) {
+            <div class="movieItem">
+              <div class="movieEmbedPreview" [innerHTML]="movie.embed_html"></div>
+              <div class="movieInfo">
+                <p style="word-break: break-all">{{ movie.embed_html }}</p>
+              </div>
+              <button type="button" (click)="removeMovie($index)" class="removeBtn hoverBtn">
+                Remove
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="formActions">
+        <button type="submit" class="submitBtn hoverBtn" [disabled]="loading">
+          {{ loading ? 'Submitting...' : 'Add Game' }}
+        </button>
+        <button type="button" (click)="goBack()" class="cancelBtn hoverBtn">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>

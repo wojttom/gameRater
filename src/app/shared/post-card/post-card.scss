@@ -1,0 +1,100 @@
+.postCard {
+  display: flex;
+  gap: 16px;
+  background: rgba(35, 43, 54, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: var(--color1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  }
+}
+
+.postVote {
+  flex-shrink: 0;
+}
+
+.postContent {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.postTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #eaeef2;
+  margin: 0;
+  word-break: break-word;
+}
+
+.postPreview {
+  font-size: 0.9rem;
+  color: #a3b3c1;
+  margin: 0;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.postMentions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.mentionsLabel {
+  font-size: 0.85rem;
+}
+
+.mentionBadge {
+  background: color-mix(in srgb, var(--color3) 20%, transparent);
+  color: var(--color3);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: color-mix(in srgb, var(--color3) 40%, transparent);
+  }
+}
+
+.postMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.85rem;
+  color: #6b7c93;
+}
+
+.postAuthor {
+  color: var(--color2);
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.postComments {
+  color: #a3b3c1;
+}
+
+.postDate {
+  color: #6b7c93;
+}
+
+.postEdited {
+  font-style: italic;
+  color: #6b7c93;
+}

@@ -1,0 +1,106 @@
+<div class="postBg"></div>
+<div class="postContainer">
+  <app-back-button label="Back" [fallbackUrl]="'/u/' + username"></app-back-button>
+
+  @if (loading) {
+    <div class="postLoading">Loading...</div>
+  }
+  @if (error) {
+    <div class="postError">{{ error }}</div>
+  }
+  @if (post && !loading) {
+    <div class="postMain">
+      @if (editMode) {
+        <app-post-editor
+          [editMode]="true"
+          [existingPost]="post"
+          (postUpdated)="onPostUpdated($event)"
+          (cancelled)="editMode = false"
+        ></app-post-editor>
+      } @else {
+        <div class="postHeader">
+          <div class="postVote">
+            <app-vote-buttons
+              [targetType]="'post'"
+              [targetId]="post._id"
+              [upvotes]="post.upvotes"
+              [downvotes]="post.downvotes"
+              [score]="post.score"
+              [userVote]="post.userVote"
+            ></app-vote-buttons>
+          </div>
+
+          <div class="postInfo">
+            <h1 class="postTitle">{{ post.title }}</h1>
+            <div class="postMeta">
+              <div class="postAuthorAvatar hoverLift" (click)="goToAuthor()">
+                @if (post.authorId?.avatarUrl) {
+                  <img [src]="post.authorId.avatarUrl" [alt]="post.authorId.username" />
+                } @else {
+                  <span class="avatarPlaceholder">👤</span>
+                }
+              </div>
+              <span class="postAuthor hoverUnderline" (click)="goToAuthor()">
+                {{ post.authorId?.username }}
+              </span>
+              <span class="postDate">{{ post.createdAt | date: 'medium' }}</span>
+              @if (post.isEdited) {
+                <span class="postEdited">(edited)</span>
+              }
+            </div>
+          </div>
+        </div>
+
+        @if (post.mentionedGames?.length) {
+          <div class="postMentions">
+            <span class="mentionsLabel">🎮 Mentioned games:</span>
+            @for (game of post.mentionedGames; track game.appid) {
+              <app-game-badge [game]="game"></app-game-badge>
+            }
+          </div>
+        }
+
+        <div class="postContent" [innerHTML]="post.content | markdown"></div>
+
+        @if (isAuthor) {
+          <div class="postActions">
+            @if (canEdit()) {
+              <button class="actionBtn hoverBtn" (click)="startEdit()">
+                Edit
+                <span class="editTimer">{{ getTimeRemaining() }}</span>
+              </button>
+            }
+            <button class="actionBtn delete hoverBtn" (click)="deletePost()">Delete</button>
+          </div>
+        }
+      }
+
+      <div class="commentsSection">
+        <h2 class="commentsTitle">Comments ({{ post.commentCount || 0 }})</h2>
+
+        <app-comment-form
+          [parentType]="'post'"
+          [parentId]="post._id"
+          [rootId]="post._id"
+          [rootType]="'post'"
+          (commentCreated)="onCommentAdded($event)"
+        ></app-comment-form>
+
+        @if (comments.length) {
+          <div class="commentsList">
+            <app-comment-tree
+              [comments]="comments"
+              [rootId]="post._id"
+              [rootType]="'post'"
+              [currentUserId]="currentUserId"
+              (commentAdded)="onCommentAdded($event)"
+              (commentDeleted)="onCommentDeleted($event)"
+            ></app-comment-tree>
+          </div>
+        } @else {
+          <p class="noComments">No comments yet. Be the first to comment!</p>
+        }
+      </div>
+    </div>
+  }
+</div>
