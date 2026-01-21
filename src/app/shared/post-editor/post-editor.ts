@@ -129,17 +129,22 @@ export class PostEditorComponent implements OnInit {
     const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
 
     if (this.editMode && this.existingPost) {
-      this.http.put<any>(`/api/posts/${this.existingPost._id}`, postData, { headers, withCredentials: true }).subscribe({
-        next: (post) => {
-          this.postUpdated.emit(post);
-          this.isSubmitting = false;
-          this.resetForm();
-        },
-        error: (err) => {
-          this.error = err.error?.error || 'Error updating post';
-          this.isSubmitting = false;
-        },
-      });
+      this.http
+        .put<any>(`/api/posts/${this.existingPost._id}`, postData, {
+          headers,
+          withCredentials: true,
+        })
+        .subscribe({
+          next: (post) => {
+            this.postUpdated.emit(post);
+            this.isSubmitting = false;
+            this.resetForm();
+          },
+          error: (err) => {
+            this.error = err.error?.error || 'Error updating post';
+            this.isSubmitting = false;
+          },
+        });
     } else {
       this.http.post<any>('/api/posts', postData, { headers, withCredentials: true }).subscribe({
         next: (post) => {

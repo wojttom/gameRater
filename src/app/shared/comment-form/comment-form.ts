@@ -78,17 +78,19 @@ export class CommentFormComponent {
         content: this.content.trim(),
       };
 
-      this.http.post<any>('/api/comments', commentData, { headers, withCredentials: true }).subscribe({
-        next: (comment) => {
-          this.commentCreated.emit(comment);
-          this.isSubmitting = false;
-          this.content = '';
-        },
-        error: (err) => {
-          this.error = err.error?.error || 'Error creating comment';
-          this.isSubmitting = false;
-        },
-      });
+      this.http
+        .post<any>('/api/comments', commentData, { headers, withCredentials: true })
+        .subscribe({
+          next: (comment) => {
+            this.commentCreated.emit(comment);
+            this.isSubmitting = false;
+            this.content = '';
+          },
+          error: (err) => {
+            this.error = err.error?.error || 'Error creating comment';
+            this.isSubmitting = false;
+          },
+        });
     }
   }
 

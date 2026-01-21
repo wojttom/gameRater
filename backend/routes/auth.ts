@@ -23,8 +23,16 @@ const authLimiter = rateLimit({
 
 const registerSchema = joi.object({
   email: joi.string().email().max(254).required(),
-  username: joi.string().regex(/^[a-zA-Z0-9._-]{3,30}$/).required(),
-  password: joi.string().min(8).max(128).regex(/^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=\[{\]}:;"'<>,.?/\\|`~]).*$/).required(),
+  username: joi
+    .string()
+    .regex(/^[a-zA-Z0-9._-]{3,30}$/)
+    .required(),
+  password: joi
+    .string()
+    .min(8)
+    .max(128)
+    .regex(/^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=\[{\]}:;"'<>,.?/\\|`~]).*$/)
+    .required(),
 });
 
 const loginSchema = joi.object({
