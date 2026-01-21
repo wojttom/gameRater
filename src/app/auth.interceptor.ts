@@ -13,6 +13,15 @@ let isRefreshing = false;
 export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: HttpHandlerFn) => {
   const http = inject(HttpClient);
 
+  const token = localStorage.getItem('token');
+  if (token) {
+    req = req.clone({
+      setHeaders: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
+
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
       if (

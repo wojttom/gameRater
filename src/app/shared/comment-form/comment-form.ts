@@ -1,4 +1,5 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 
@@ -48,14 +49,14 @@ export class CommentFormComponent {
     this.isSubmitting = true;
     this.error = '';
 
-    const headers = { Authorization: `Bearer ${token}` };
+    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
 
     if (this.editMode && this.existingComment) {
       this.http
         .put<any>(
           `/api/comments/${this.existingComment._id}`,
           { content: this.content.trim() },
-          { headers },
+          { headers, withCredentials: true },
         )
         .subscribe({
           next: (comment) => {
@@ -77,7 +78,7 @@ export class CommentFormComponent {
         content: this.content.trim(),
       };
 
-      this.http.post<any>('/api/comments', commentData, { headers }).subscribe({
+      this.http.post<any>('/api/comments', commentData, { headers, withCredentials: true }).subscribe({
         next: (comment) => {
           this.commentCreated.emit(comment);
           this.isSubmitting = false;

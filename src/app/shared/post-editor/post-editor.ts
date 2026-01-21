@@ -1,4 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Subject } from 'rxjs';
@@ -125,10 +126,10 @@ export class PostEditorComponent implements OnInit {
       mentionedGames: this.mentionedGames,
     };
 
-    const headers = { Authorization: `Bearer ${token}` };
+    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
 
     if (this.editMode && this.existingPost) {
-      this.http.put<any>(`/api/posts/${this.existingPost._id}`, postData, { headers }).subscribe({
+      this.http.put<any>(`/api/posts/${this.existingPost._id}`, postData, { headers, withCredentials: true }).subscribe({
         next: (post) => {
           this.postUpdated.emit(post);
           this.isSubmitting = false;
@@ -140,7 +141,7 @@ export class PostEditorComponent implements OnInit {
         },
       });
     } else {
-      this.http.post<any>('/api/posts', postData, { headers }).subscribe({
+      this.http.post<any>('/api/posts', postData, { headers, withCredentials: true }).subscribe({
         next: (post) => {
           this.postCreated.emit(post);
           this.isSubmitting = false;

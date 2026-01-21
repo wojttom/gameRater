@@ -79,7 +79,7 @@
   .brandText {
     font-size: 18px;
     font-weight: 700;
-    background: linear-gradient(135deg, #4a9eff, #a855f7);
+    background: var(--color2);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -246,7 +246,7 @@
   justify-content: center;
   width: 42px;
   height: 42px;
-  background: linear-gradient(135deg, #4a9eff, #a855f7);
+  background: var(--color2);
   border: none;
   border-radius: 50%;
   cursor: pointer;
@@ -274,7 +274,7 @@
   align-items: center;
   gap: 8px;
   padding: 10px 18px;
-  background: linear-gradient(135deg, #4a9eff, #a855f7);
+  background: var(--color2);
   border: none;
   border-radius: 10px;
   color: #fff;

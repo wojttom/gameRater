@@ -51,6 +51,7 @@ export class App implements OnInit, OnDestroy {
     }
 
     console.log('Current User:', this.currentUser);
+    console.log('Current user token:', localStorage.getItem('token'));
     console.log('Current User Avatar URL:', this.currentUser?.avatarUrl);
     this.routerSub = this.router.events
       .pipe(filter((e) => e instanceof NavigationEnd))

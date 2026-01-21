@@ -4,9 +4,16 @@ import Comment from '../models/comment';
 import Vote from '../models/vote';
 import GameMention from '../models/gameMention';
 import User from '../models/user';
+import joi from 'joi';
 import * as authMiddleware from '../middleware/auth';
 
 const router = express.Router();
+
+const createPostSchema = joi.object({
+  title: joi.string().min(1).max(200).required(),
+  content: joi.string().max(10000).required(),
+  mentionedGames: joi.array().items(joi.object()).optional(),
+});
 
 router.get('/posts', async (req, res) => {
   try {
@@ -104,11 +111,10 @@ router.get('/posts/game/:appid', async (req, res) => {
 
 router.post('/posts', authMiddleware.auth, async (req: any, res) => {
   try {
-    const { title, content, mentionedGames } = req.body;
+    const { error } = createPostSchema.validate(req.body);
+    if (error) return res.status(400).json({ error: error.details[0].message });
 
-    if (!title || !content) {
-      return res.status(400).json({ error: 'Title and content are required' });
-    }
+    const { title, content, mentionedGames } = req.body;
 
     const post = new Post({
       authorId: req.user.id,

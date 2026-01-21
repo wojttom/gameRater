@@ -3,6 +3,8 @@ import jwt from 'jsonwebtoken';
 import User from '../models/user';
 import bcrypt from 'bcryptjs';
 import mongoose from 'mongoose';
+import rateLimit from 'express-rate-limit';
+import joi from 'joi';
 import { Request } from 'express';
 
 const router = express.Router();
@@ -12,6 +14,23 @@ interface AuthRequest extends Request {
 
 const JWT_SECRET: string = process.env.JWT_SECRET ?? 'devSecret';
 const REFRESH_SECRET: string = process.env.REFRESH_SECRET ?? 'devRefresh';
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // limit each IP to 5 login attempts per windowMs
+  message: 'Too many login attempts from this IP, please try again later.',
+});
+
+const registerSchema = joi.object({
+  email: joi.string().email().max(254).required(),
+  username: joi.string().regex(/^[a-zA-Z0-9._-]{3,30}$/).required(),
+  password: joi.string().min(8).max(128).regex(/^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=\[{\]}:;"'<>,.?/\\|`~]).*$/).required(),
+});
+
+const loginSchema = joi.object({
+  email: joi.string().email().required(),
+  password: joi.string().required(),
+});
 
 router.get('/test-db', async (_req, res) => {
   try {
@@ -28,6 +47,9 @@ router.get('/test-db', async (_req, res) => {
 
 router.post('/register', async (req: express.Request, res: express.Response) => {
   try {
+    const { error } = registerSchema.validate(req.body);
+    if (error) return res.status(400).json({ message: error.details[0].message });
+
     const { email, username, password } = req.body ?? {};
 
     const emailS = String(email ?? '')
@@ -91,10 +113,12 @@ router.post('/register', async (req: express.Request, res: express.Response) => 
   }
 });
 
-router.post('/login', async (req, res) => {
+router.post('/login', authLimiter, async (req, res) => {
   try {
+    const { error } = loginSchema.validate(req.body);
+    if (error) return res.status(400).json({ message: error.details[0].message });
+
     const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ message: 'Missing fields' });
 
     const user = await User.findOne({ email });
     if (!user) return res.status(401).json({ message: 'Invalid credentials' });
@@ -105,6 +129,13 @@ router.post('/login', async (req, res) => {
     const accessToken = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '15m' });
     const refreshToken = jwt.sign({ id: user._id }, REFRESH_SECRET, { expiresIn: '7d' });
 
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 15 * 60 * 1000,
+    });
+
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -112,14 +143,16 @@ router.post('/login', async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
+    console.debug('[auth login] created tokens; returning accessToken in body');
+
     return res.json({
-      accessToken,
       user: {
         id: user._id,
         username: user.username,
         avatarUrl: user.avatarUrl || null,
         emailPublic: !!user.emailPublic,
       },
+      accessToken,
     });
   } catch (err) {
     return res.status(500).json({ message: 'Server error' });
@@ -132,13 +165,28 @@ router.post('/refresh', (req, res) => {
     if (!token) return res.status(401).json({ message: 'No refresh token' });
     const payload: any = jwt.verify(token, REFRESH_SECRET);
     const newAccess = jwt.sign({ id: payload.id }, JWT_SECRET, { expiresIn: '15m' });
-    return res.json({ accessToken: newAccess });
+
+    res.cookie('accessToken', newAccess, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 15 * 60 * 1000,
+    });
+
+    console.debug('[auth refresh] new access token created; returning in body');
+
+    return res.json({ accessToken: newAccess, message: 'Token refreshed' });
   } catch (e) {
     return res.status(401).json({ message: 'Invalid refresh token' });
   }
 });
 
 router.post('/logout', (_req, res) => {
+  res.clearCookie('accessToken', {
+    httpOnly: true,
+    sameSite: 'strict',
+    secure: process.env.NODE_ENV === 'production',
+  });
   res.clearCookie('refreshToken', {
     httpOnly: true,
     sameSite: 'lax',
