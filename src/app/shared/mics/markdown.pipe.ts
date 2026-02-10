@@ -9,8 +9,8 @@ import { marked } from 'marked';
 export class MarkdownPipe implements PipeTransform {
   constructor(private sanitizer: DomSanitizer) {
     marked.setOptions({
-      breaks: true, // Zamień \n na <br>
-      gfm: true, // GitHub Flavored Markdown
+      breaks: true,
+      gfm: true,
     });
   }
 

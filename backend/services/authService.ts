@@ -14,7 +14,16 @@ export class AuthService {
   private currentUserSubject = new BehaviorSubject<UserModel | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    this.fetchCurrentUser();
+  }
+
+  fetchCurrentUser() {
+    this.http.get<UserModel>('/api/auth/me', { withCredentials: true }).subscribe({
+      next: (user) => this.currentUserSubject.next(user),
+      error: () => this.currentUserSubject.next(null),
+    });
+  }
 
   login(creds: { email: string; password: string }): Observable<any> {
     return this.http

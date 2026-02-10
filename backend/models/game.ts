@@ -1,5 +1,5 @@
 export interface GameDetails {
-  appid?: string | number; // For both Steam (number) and custom games (string like "c176644")
+  appid?: string | number;
   type: string;
   name: string;
   steam_appid: number;
@@ -51,4 +51,5 @@ export interface GameDetails {
     appid: string | number;
     name: string;
   };
+  createdBy?: string | { username: string } | null;
 }

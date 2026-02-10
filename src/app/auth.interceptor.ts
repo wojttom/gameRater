@@ -6,21 +6,14 @@ import {
 } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { catchError, switchMap, throwError } from 'rxjs';
+import { BehaviorSubject, throwError } from 'rxjs';
+import { catchError, switchMap, filter, take, tap } from 'rxjs/operators';
 
 let isRefreshing = false;
+const refreshSubject = new BehaviorSubject<boolean | null>(null);
 
 export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: HttpHandlerFn) => {
   const http = inject(HttpClient);
-
-  const token = localStorage.getItem('token');
-  if (token) {
-    req = req.clone({
-      setHeaders: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-  }
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
@@ -31,30 +24,31 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
       ) {
         if (!isRefreshing) {
           isRefreshing = true;
+          refreshSubject.next(null);
 
           return http
-            .post<{ accessToken: string }>('/api/auth/refresh', {}, { withCredentials: true })
+            .post<{ message?: string }>('/api/auth/refresh', {}, { withCredentials: true })
             .pipe(
-              switchMap((response) => {
+              switchMap(() => {
                 isRefreshing = false;
-                localStorage.setItem('token', response.accessToken);
-
-                const newReq = req.clone({
-                  setHeaders: {
-                    Authorization: `Bearer ${response.accessToken}`,
-                  },
-                });
-                return next(newReq);
+                refreshSubject.next(true);
+                return next(req);
               }),
               catchError((refreshError) => {
                 isRefreshing = false;
-                localStorage.removeItem('token');
+                refreshSubject.next(false);
                 localStorage.removeItem('currentUser');
                 window.location.href = '/login';
                 return throwError(() => refreshError);
               }),
             );
         }
+
+        return refreshSubject.pipe(
+          filter((v) => v === true),
+          take(1),
+          switchMap(() => next(req)),
+        );
       }
       return throwError(() => error);
     }),

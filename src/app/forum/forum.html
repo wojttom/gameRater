@@ -3,12 +3,12 @@
   <app-back-button label="Home" fallbackUrl="/"></app-back-button>
 
   <header class="forumHeader">
-    <h1 class="forumTitle">🎮 Forum</h1>
+    <h1 class="forumTitle">Forum</h1>
     <p class="forumSubtitle">Discuss games with the community</p>
   </header>
 
   @if (isLoggedIn && !showPostEditor) {
-    <button class="newPostBtn hoverBtn" (click)="showPostEditor = true">✍️ Create New Post</button>
+    <button class="newPostBtn hoverBtn" (click)="showPostEditor = true">Create New Post</button>
   }
 
   @if (showPostEditor) {
@@ -22,9 +22,9 @@
     <div class="filterGroup">
       <label>Sort by:</label>
       <select [(ngModel)]="sortBy" (change)="onSortChange()">
-        <option value="karma">🔥 Top (Karma)</option>
-        <option value="new">🆕 Newest</option>
-        <option value="old">📅 Oldest</option>
+        <option value="karma">Top (Karma)</option>
+        <option value="new">Newest</option>
+        <option value="old">Oldest</option>
       </select>
     </div>
 

@@ -65,6 +65,21 @@ export class CommentTreeComponent {
   }
 
   onCommentUpdated(comment: any) {
+    const updateInList = (list: any[]): boolean => {
+      for (let i = 0; i < list.length; i++) {
+        if (list[i]._id === comment._id) {
+          list[i] = { ...list[i], ...comment };
+          return true;
+        }
+        if (list[i].replies && list[i].replies.length) {
+          const found = updateInList(list[i].replies);
+          if (found) return true;
+        }
+      }
+      return false;
+    };
+
+    updateInList(this.comments);
     this.editingComment = null;
   }
 

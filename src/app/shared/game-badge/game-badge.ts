@@ -12,8 +12,6 @@ import { Router } from '@angular/router';
           [alt]="game.name"
           onerror="this.style.display='none'"
         />
-      } @else {
-        <span class="gameBadgePlaceholder">🎮</span>
       }
       <span class="gameBadgeName">{{ game.name }}</span>
     </span>
@@ -45,10 +43,6 @@ import { Router } from '@angular/router';
         height: 20px;
         border-radius: 4px;
         object-fit: cover;
-      }
-
-      .gameBadgePlaceholder {
-        font-size: 14px;
       }
 
       .gameBadgeName {

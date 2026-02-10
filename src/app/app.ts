@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, HostListener, ElementRef, ViewChild } from '@angular/core';
 import { UserModel } from '../../backend/services/authService';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
-import { Subscription, Subject } from 'rxjs';
+import { Subscription, Subject, of } from 'rxjs';
 import { filter, debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -51,7 +51,6 @@ export class App implements OnInit, OnDestroy {
     }
 
     console.log('Current User:', this.currentUser);
-    console.log('Current user token:', localStorage.getItem('token'));
     console.log('Current User Avatar URL:', this.currentUser?.avatarUrl);
     this.routerSub = this.router.events
       .pipe(filter((e) => e instanceof NavigationEnd))
@@ -68,7 +67,7 @@ export class App implements OnInit, OnDestroy {
         filter((query) => query.length > 2),
         switchMap((query) => {
           this.isSearching = true;
-          if (!isNaN(Number(query))) return [];
+          if (!isNaN(Number(query))) return of({ steam: [], custom: [] });
           return this.http.get<any>(`/api/steam/search-all?term=${query}`);
         }),
       )

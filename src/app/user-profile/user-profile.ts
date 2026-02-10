@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { PasswordValidation } from '../../../backend/services/passwdValidation';
@@ -8,6 +8,7 @@ import { Title } from '@angular/platform-browser';
 import { PostCardComponent } from '../shared/post-card/post-card';
 import { PostEditorComponent } from '../shared/post-editor/post-editor';
 import { BackButtonComponent } from '../shared/back-button/back-button';
+import { VoteButtonsComponent } from '../shared/vote-buttons/vote-buttons';
 import { MarkdownPipe } from '../shared/mics/markdown.pipe';
 
 @Component({
@@ -20,6 +21,7 @@ import { MarkdownPipe } from '../shared/mics/markdown.pipe';
     PostCardComponent,
     PostEditorComponent,
     BackButtonComponent,
+    VoteButtonsComponent,
     MarkdownPipe,
   ],
 })
@@ -41,19 +43,18 @@ export class UserProfile implements OnInit {
   loadingPosts = false;
   hasMorePosts = false;
   postsPage = 1;
-
+  isVoting = false;
+  private gameImageCache = new Map<string, string>();
+  private gameImagePending = new Set<string>();
   constructor(
     private route: ActivatedRoute,
     private http: HttpClient,
     private titleService: Title,
-    private router: Router,
   ) {}
 
   ngOnInit(): void {
     this.route.params.subscribe((params) => {
       this.username = params['username'];
-
-      // determine current user state after we have the route username
       const storedUser = localStorage.getItem('currentUser');
       const currentUser = storedUser ? JSON.parse(storedUser) : null;
       this.isCurrentUser = currentUser?.username === this.username;
@@ -203,16 +204,49 @@ export class UserProfile implements OnInit {
   }
 
   getGameImageUrl(game: any): string {
-    if (game.header_image) {
+    const key = this.getGameKey(game);
+    const cached = this.gameImageCache.get(key);
+    if (cached) return cached;
+
+    const fallback = this.getGameFallbackImage(game);
+    this.gameImageCache.set(key, fallback);
+
+    if (game.appid && !this.gameImagePending.has(key)) {
+      this.gameImagePending.add(key);
+      this.resolveCdnImage(game.appid)
+        .then((cdnUrl) => {
+          if (cdnUrl) this.gameImageCache.set(key, cdnUrl);
+        })
+        .finally(() => {
+          this.gameImagePending.delete(key);
+        });
+    }
+
+    return fallback;
+  }
+
+  private getGameKey(game: any): string {
+    return String(game.appid || game._id || game.name || 'unknown');
+  }
+
+  private getGameFallbackImage(game: any): string {
+    if (game.header_image && game.header_image.trim() !== '') {
       return game.header_image;
     }
-    if (game.capsule_image) {
+    if (game.capsule_image && game.capsule_image.trim() !== '') {
       return game.capsule_image;
     }
-    if (game.appid && typeof game.appid === 'number') {
-      return `https://cdn.cloudflare.steamstatic.com/steam/apps/${game.appid}/capsule_184x69.jpg`;
+    return `https://placehold.co/184x69?text=${encodeURIComponent(game.name || 'Game')}`;
+  }
+
+  private async resolveCdnImage(appid: number | string): Promise<string | null> {
+    const cdnUrl = `https://cdn.cloudflare.steamstatic.com/steam/apps/${encodeURIComponent(appid)}/capsule_184x69.jpg`;
+    try {
+      const response = await fetch(cdnUrl, { method: 'HEAD' });
+      return response.ok ? cdnUrl : null;
+    } catch (e) {
+      return null;
     }
-    return '';
   }
 
   deleteReview(reviewId: string) {
@@ -241,45 +275,43 @@ export class UserProfile implements OnInit {
     });
   }
 
-  voteOnProfile(value: 1 | -1) {
-    if (!this.user?._id) return;
+  voteOnProfile(value: any) {
+    const voteValue = typeof value === 'number' ? value : Number(value);
+    if (!this.user?._id || this.isVoting || (voteValue !== 1 && voteValue !== -1)) return;
 
+    this.isVoting = true;
     this.http
       .post<{ reputation: number; userVote: number | null }>('/api/vote', {
         targetType: 'user',
         targetId: this.user._id,
-        value,
+        value: voteValue,
       })
       .subscribe({
         next: (res) => {
           this.user.reputation = res.reputation;
           this.userVote = res.userVote;
+          this.isVoting = false;
         },
         error: (err) => {
           console.error('Vote error:', err);
+          this.isVoting = false;
         },
       });
   }
 
   deleteAccount() {
     if (!confirm('Czy na pewno chcesz usunąć konto? To nieodwracalne.')) return;
+    const isLogged = !!localStorage.getItem('currentUser');
+    if (!isLogged) return;
 
-    const token = localStorage.getItem('token');
-    if (!token) return;
-
-    this.http
-      .delete(`/api/user/${this.username}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .subscribe({
-        next: () => {
-          localStorage.removeItem('currentUser');
-          localStorage.removeItem('token');
-          window.location.href = '/';
-        },
-        error: (err) => {
-          alert('Błąd podczas usuwania konta: ' + (err.error?.error || 'Nieznany błąd'));
-        },
-      });
+    this.http.delete(`/api/user/${this.username}`, { withCredentials: true }).subscribe({
+      next: () => {
+        localStorage.removeItem('currentUser');
+        window.location.href = '/';
+      },
+      error: (err) => {
+        alert('Błąd podczas usuwania konta: ' + (err.error?.error || 'Nieznany błąd'));
+      },
+    });
   }
 }

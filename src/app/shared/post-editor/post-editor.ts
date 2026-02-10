@@ -111,12 +111,6 @@ export class PostEditorComponent implements OnInit {
       return;
     }
 
-    const token = localStorage.getItem('token');
-    if (!token) {
-      this.error = 'You must be logged in';
-      return;
-    }
-
     this.isSubmitting = true;
     this.error = '';
 
@@ -126,12 +120,9 @@ export class PostEditorComponent implements OnInit {
       mentionedGames: this.mentionedGames,
     };
 
-    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
-
     if (this.editMode && this.existingPost) {
       this.http
         .put<any>(`/api/posts/${this.existingPost._id}`, postData, {
-          headers,
           withCredentials: true,
         })
         .subscribe({
@@ -146,7 +137,7 @@ export class PostEditorComponent implements OnInit {
           },
         });
     } else {
-      this.http.post<any>('/api/posts', postData, { headers, withCredentials: true }).subscribe({
+      this.http.post<any>('/api/posts', postData, { withCredentials: true }).subscribe({
         next: (post) => {
           this.postCreated.emit(post);
           this.isSubmitting = false;

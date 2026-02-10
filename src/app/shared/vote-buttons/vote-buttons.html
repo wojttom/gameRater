@@ -1,4 +1,4 @@
-<div class="voteButtons" [class.horizontal]="!vertical" [class.disabled]="!isLoggedIn">
+<div class="voteButtons" [class.horizontal]="!horizontal" [class.disabled]="!isLoggedIn">
   <button
     class="voteBtn upvote"
     [class.active]="userVote === 1"
@@ -8,9 +8,11 @@
   >
     ▲
   </button>
-  <span class="voteScore" [class.positive]="score > 0" [class.negative]="score < 0">
-    {{ score }}
-  </span>
+  @if (!hideScore) {
+    <span class="voteScore" [class.positive]="score > 0" [class.negative]="score < 0">
+      {{ score }}
+    </span>
+  }
   <button
     class="voteBtn downvote"
     [class.active]="userVote === -1"

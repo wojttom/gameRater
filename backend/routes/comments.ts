@@ -181,7 +181,6 @@ router.delete('/comments/:id', auth, async (req: any, res) => {
 
     await Comment.findByIdAndDelete(req.params.id);
 
-    // Recalculate commentCount after deletion
     const actualCount = await Comment.countDocuments({
       rootId: comment.rootId,
       rootType: comment.rootType,

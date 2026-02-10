@@ -1,3 +1,4 @@
+import { firstValueFrom } from 'rxjs';
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { DecimalPipe, DatePipe } from '@angular/common';
@@ -38,7 +39,9 @@ export class GameInfo implements OnInit {
   game: any = null;
   isDLC = false;
   isCustomGame = false;
+  createdBy: any = null;
   @ViewChild('videoPlayer') videoPlayer: ElementRef | undefined;
+  private hlsInstance: any = null;
 
   isLoggedIn = false;
   currentUsername: string = '';
@@ -49,7 +52,7 @@ export class GameInfo implements OnInit {
   reviewRating = 5;
   reviewText = '';
   reviews: any[] = [];
-  safeMovies: Array<{ id: any; safeHtml: SafeHtml; name?: string }> = [];
+  movies: Array<{ id: any; safeHtml: SafeHtml; name?: string }> = [];
   relatedPosts: any[] = [];
 
   constructor(
@@ -60,6 +63,10 @@ export class GameInfo implements OnInit {
     private sanitizer: DomSanitizer,
   ) {}
 
+  goToUserProfile(username: string) {
+    this.router.navigate(['/u', username]);
+  }
+
   ngOnInit(): void {
     this.route.params.subscribe((params) => {
       const gameId = params['appid'];
@@ -69,7 +76,6 @@ export class GameInfo implements OnInit {
         this.error = 'Invalid game ID in URL';
       }
     });
-
     const storedUser = localStorage.getItem('currentUser');
     if (storedUser) {
       const user = JSON.parse(storedUser);
@@ -91,18 +97,13 @@ export class GameInfo implements OnInit {
 
         this.currentAppId = data.appid || gameId;
         this.isCustomGame = typeof data.appid === 'string' && /^c\d/.test(data.appid);
-
-        const background = data?.background_raw;
-        if (background) {
-          this.extractDominantColor(background);
-        }
-
+        this.createdBy = data.createdBy || null;
         this.checkIfFavorite();
         this.loadReviews();
         this.loadRelatedPosts();
         this.isDLC = data.type === 'dlc';
         this.game = data.fullgame || null;
-        this.prepareSafeMovies();
+        this.prepareMovies();
         this.prepareGalleryItems();
       },
       error: (err) => {
@@ -117,30 +118,6 @@ export class GameInfo implements OnInit {
       `https://store.steampowered.com/api/appdetails?appids=${this.currentAppId}&l=english&cc=EN`,
       '_blank',
     );
-  }
-
-  private extractDominantColor(imageUrl: string) {
-    const img = new Image();
-    img.crossOrigin = 'Anonymous';
-    const proxyUrl = 'https://corsproxy.io/?';
-    img.src = proxyUrl + encodeURIComponent(imageUrl);
-
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
-      canvas.width = 1;
-      canvas.height = 1;
-      ctx.drawImage(img, 0, 0, 1, 1);
-
-      const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
-      this.dominantColor = `rgb(${r}, ${g}, ${b})`;
-    };
-
-    img.onerror = () => {
-      this.dominantColor = '#1b2838';
-    };
   }
 
   openStore(appid: number) {
@@ -176,11 +153,18 @@ export class GameInfo implements OnInit {
     if (!this.videoPlayer) return;
 
     const videoElement = this.videoPlayer.nativeElement as HTMLVideoElement;
+    try {
+      if (this.hlsInstance && typeof this.hlsInstance.destroy === 'function') {
+        this.hlsInstance.destroy();
+        this.hlsInstance = null;
+      }
+    } catch (e) {}
 
     if (Hls.isSupported()) {
       const hls = new Hls();
       hls.loadSource(streamUrl);
       hls.attachMedia(videoElement);
+      this.hlsInstance = hls;
     } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
       videoElement.src = streamUrl;
     }
@@ -188,8 +172,8 @@ export class GameInfo implements OnInit {
 
   prepareGalleryItems() {
     this.allGalleryItems = [];
-    if (this.gameDetails.movies && this.gameDetails.movies.length > 0) {
-      this.gameDetails.movies.forEach((movie: any) => {
+    if (this.movies && this.movies.length > 0) {
+      this.movies.forEach((movie: any) => {
         if (movie.thumbnail || movie.hls || movie.hls_h264) {
           this.allGalleryItems.push({
             ...movie,
@@ -221,6 +205,23 @@ export class GameInfo implements OnInit {
       const item = this.allGalleryItems[this.currentScreenshotIndex];
       this.currentScreenshot = item;
       this.currentItemType = item.type;
+      if (item.type === 'movie') {
+        setTimeout(() => {
+          const stream = item.hls_h264 || item.hls || item.video_url;
+          if (stream) this.initHlsPlayer(stream);
+        }, 100);
+      } else {
+        try {
+          if (this.hlsInstance && typeof this.hlsInstance.destroy === 'function') {
+            this.hlsInstance.destroy();
+            this.hlsInstance = null;
+          }
+          if (this.videoPlayer) {
+            const ve = this.videoPlayer.nativeElement as HTMLVideoElement;
+            ve.src = '';
+          }
+        } catch (e) {}
+      }
     }
   }
 
@@ -230,6 +231,23 @@ export class GameInfo implements OnInit {
       const item = this.allGalleryItems[this.currentScreenshotIndex];
       this.currentScreenshot = item;
       this.currentItemType = item.type;
+      if (item.type === 'movie') {
+        setTimeout(() => {
+          const stream = item.hls_h264 || item.hls || item.video_url;
+          if (stream) this.initHlsPlayer(stream);
+        }, 100);
+      } else {
+        try {
+          if (this.hlsInstance && typeof this.hlsInstance.destroy === 'function') {
+            this.hlsInstance.destroy();
+            this.hlsInstance = null;
+          }
+          if (this.videoPlayer) {
+            const ve = this.videoPlayer.nativeElement as HTMLVideoElement;
+            ve.src = '';
+          }
+        } catch (e) {}
+      }
     }
   }
 
@@ -240,7 +258,7 @@ export class GameInfo implements OnInit {
     if (event.key === 'Escape') this.closeGallery();
   }
 
-  toggleFavorite() {
+  async toggleFavorite() {
     if (!this.isLoggedIn) {
       alert('Please sign in to add games to favorites');
       return;
@@ -258,10 +276,23 @@ export class GameInfo implements OnInit {
           },
         });
     } else {
+      let header_image = this.gameDetails.header_image || '';
+      let capsule_image = this.gameDetails.capsule_image || '';
+      if ((!header_image || !capsule_image) && this.currentAppId) {
+        try {
+          const details: any = await firstValueFrom(
+            this.http.get(`/api/steam/details/${this.currentAppId}`),
+          );
+          if (!header_image && details.header_image) header_image = details.header_image;
+          if (!capsule_image && details.capsule_image) capsule_image = details.capsule_image;
+        } catch (e) {}
+      }
       this.http
         .post(`/api/user/${this.currentUsername}/favorites/${this.currentAppId}`, {
           gameName: this.gameDetails.name,
           isCustom: this.isCustomGame,
+          header_image,
+          capsule_image,
         })
         .subscribe({
           next: () => {
@@ -306,9 +337,9 @@ export class GameInfo implements OnInit {
     });
   }
 
-  private prepareSafeMovies() {
+  private prepareMovies() {
     const movies = this.gameDetails?.movies || [];
-    this.safeMovies = movies
+    this.movies = movies
       .filter((m: any) => m?.embed_html || m?.video_url)
       .map((m: any, idx: number) => ({
         ...m,

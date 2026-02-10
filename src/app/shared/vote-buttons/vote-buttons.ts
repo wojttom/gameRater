@@ -1,20 +1,22 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { AuthService } from '../../../../backend/services/authService';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-vote-buttons',
   templateUrl: './vote-buttons.html',
-  styleUrl: './vote-buttons.scss',
+  styleUrls: ['./vote-buttons.scss'],
 })
 export class VoteButtonsComponent implements OnInit {
-  @Input() targetType: 'post' | 'comment' | 'review' = 'post';
+  @Input() targetType: 'post' | 'comment' | 'review' | 'user' = 'post';
   @Input() targetId: string = '';
   @Input() upvotes: number = 0;
   @Input() downvotes: number = 0;
   @Input() score: number = 0;
   @Input() userVote: number | null = null;
-  @Input() vertical: boolean = true;
+  @Input() horizontal: boolean = true;
+  @Input() hideScore: boolean = false;
   @Output() voteChanged = new EventEmitter<{
     upvotes: number;
     downvotes: number;
@@ -25,23 +27,25 @@ export class VoteButtonsComponent implements OnInit {
   isVoting = false;
   isLoggedIn = false;
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private authService: AuthService,
+  ) {}
 
   ngOnInit() {
-    this.isLoggedIn = !!localStorage.getItem('token');
+    this.authService.currentUser$.subscribe((user) => {
+      this.isLoggedIn = !!user;
+    });
   }
 
   vote(value: 1 | -1) {
     if (this.isVoting) return;
-
-    const token = localStorage.getItem('token');
-    if (!token) {
+    if (!this.isLoggedIn) {
       this.router.navigate(['/login']);
       return;
     }
-
     this.isVoting = true;
-
     this.http
       .post<any>(
         '/api/vote',
@@ -50,9 +54,7 @@ export class VoteButtonsComponent implements OnInit {
           targetId: this.targetId,
           value,
         },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { withCredentials: true },
       )
       .subscribe({
         next: (response) => {

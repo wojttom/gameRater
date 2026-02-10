@@ -11,12 +11,18 @@ const router = express.Router();
 router.post('/vote', auth, async (req: any, res) => {
   try {
     const { targetType, targetId, value } = req.body;
+    if (!req.user || !req.user.id) {
+      console.log('Unauthorized: brak usera');
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
 
     if (!['post', 'comment', 'review', 'user'].includes(targetType)) {
+      console.log('Invalid target type:', targetType);
       return res.status(400).json({ error: 'Invalid target type' });
     }
 
     if (![1, -1].includes(value)) {
+      console.log('Invalid value:', value);
       return res.status(400).json({ error: 'Value must be 1 or -1' });
     }
 
@@ -33,7 +39,10 @@ router.post('/vote', auth, async (req: any, res) => {
       target = await User.findById(targetId);
     }
 
+    console.log('Target:', target);
+
     if (!target) {
+      console.log('Target not found:', targetId);
       return res.status(404).json({ error: 'Target not found' });
     }
 
@@ -43,7 +52,10 @@ router.post('/vote', auth, async (req: any, res) => {
       authorId = target.authorId?.toString() || target.userId?.toString();
     }
 
+    console.log('AuthorId:', authorId, 'UserId:', req.user.id);
+
     if (authorId === req.user.id) {
+      console.log('Cannot vote on own content');
       return res.status(400).json({ error: 'Cannot vote on your own content' });
     }
 
@@ -52,6 +64,8 @@ router.post('/vote', auth, async (req: any, res) => {
       targetType,
       targetId,
     });
+
+    console.log('ExistingVote:', existingVote);
 
     let upvoteDelta = 0;
     let downvoteDelta = 0;

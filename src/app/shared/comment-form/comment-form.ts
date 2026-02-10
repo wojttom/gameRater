@@ -28,7 +28,7 @@ export class CommentFormComponent {
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
-    this.isLoggedIn = !!localStorage.getItem('token');
+    this.isLoggedIn = !!localStorage.getItem('currentUser');
     if (this.editMode && this.existingComment) {
       this.content = this.existingComment.content;
     }
@@ -40,8 +40,8 @@ export class CommentFormComponent {
       return;
     }
 
-    const token = localStorage.getItem('token');
-    if (!token) {
+    const isLogged = !!localStorage.getItem('currentUser');
+    if (!isLogged) {
       this.error = 'You must be logged in';
       return;
     }
@@ -49,14 +49,12 @@ export class CommentFormComponent {
     this.isSubmitting = true;
     this.error = '';
 
-    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
-
     if (this.editMode && this.existingComment) {
       this.http
         .put<any>(
           `/api/comments/${this.existingComment._id}`,
           { content: this.content.trim() },
-          { headers, withCredentials: true },
+          { withCredentials: true },
         )
         .subscribe({
           next: (comment) => {
@@ -78,19 +76,17 @@ export class CommentFormComponent {
         content: this.content.trim(),
       };
 
-      this.http
-        .post<any>('/api/comments', commentData, { headers, withCredentials: true })
-        .subscribe({
-          next: (comment) => {
-            this.commentCreated.emit(comment);
-            this.isSubmitting = false;
-            this.content = '';
-          },
-          error: (err) => {
-            this.error = err.error?.error || 'Error creating comment';
-            this.isSubmitting = false;
-          },
-        });
+      this.http.post<any>('/api/comments', commentData, { withCredentials: true }).subscribe({
+        next: (comment) => {
+          this.commentCreated.emit(comment);
+          this.isSubmitting = false;
+          this.content = '';
+        },
+        error: (err) => {
+          this.error = err.error?.error || 'Error creating comment';
+          this.isSubmitting = false;
+        },
+      });
     }
   }
 

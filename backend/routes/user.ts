@@ -18,10 +18,17 @@ router.get('/user/:username', async (req, res) => {
   }
 });
 
-router.put('/user/:username', async (req, res) => {
+router.put('/user/:username', authMiddleware.auth, async (req: any, res) => {
   try {
     const { email, password, avatar } = req.body;
     const update: any = {};
+
+    const user = await User.findOne({ username: req.params.username });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // only allow self-update
+    if (req.user?.id !== user._id.toString())
+      return res.status(403).json({ error: 'Not authorized' });
 
     if (email) {
       const existingUser = await User.findOne({
@@ -38,34 +45,36 @@ router.put('/user/:username', async (req, res) => {
     if (password) update.password = await bcrypt.hash(password, 10);
 
     if (Object.keys(update).length === 0) {
-      const user = await User.findOne({ username: req.params.username });
-      if (!user) return res.status(404).json({ error: 'User not found' });
       const { password: pw, ...userData } = user.toObject();
       return res.json(userData);
     }
 
-    const user = await User.findOneAndUpdate(
+    const updated = await User.findOneAndUpdate(
       { username: req.params.username },
       { $set: update },
       { new: true },
     );
-    if (!user) return res.status(404).json({ error: 'User not found' });
-    const { password: pw, ...userData } = user.toObject();
+    if (!updated) return res.status(404).json({ error: 'User not found' });
+    const { password: pw, ...userData } = updated.toObject();
     res.json(userData);
   } catch (err) {
     res.status(500).json({ error: 'Server error' });
   }
 });
 
-router.post('/user/:username/favorites/:gameId', async (req, res) => {
+router.post('/user/:username/favorites/:gameId', authMiddleware.auth, async (req: any, res) => {
   try {
     const user = await User.findOne({ username: req.params.username });
     if (!user) return res.status(404).json({ error: 'User not found' });
 
+    // only allow self-favorite modifications
+    if (req.user?.id !== user._id.toString())
+      return res.status(403).json({ error: 'Not authorized' });
+
     const gameId = req.params.gameId;
     const { gameName, isCustom } = req.body;
 
-    const exists = user.favorites.some((fav: any) => fav.appid === gameId);
+    const exists = user.favorites.some((fav: any) => String(fav.appid) === String(gameId));
     if (exists) {
       const { password: pw, ...userData } = user.toObject();
       return res.json(userData);
@@ -103,16 +112,18 @@ router.post('/user/:username/favorites/:gameId', async (req, res) => {
   }
 });
 
-router.delete('/user/:username/favorites/:gameId', async (req, res) => {
+router.delete('/user/:username/favorites/:gameId', authMiddleware.auth, async (req: any, res) => {
   try {
     const user = await User.findOne({ username: req.params.username });
     if (!user) return res.status(404).json({ error: 'User not found' });
 
+    // only allow self-favorite modifications
+    if (req.user?.id !== user._id.toString())
+      return res.status(403).json({ error: 'Not authorized' });
+
     const gameId = req.params.gameId;
 
-    user.favorites = user.favorites.filter(
-      (fav: any) => fav.appid !== gameId && fav.appid !== parseInt(gameId),
-    );
+    user.favorites = user.favorites.filter((fav: any) => String(fav.appid) !== String(gameId));
     await user.save();
 
     const { password: pw, ...userData } = user.toObject();
@@ -122,12 +133,16 @@ router.delete('/user/:username/favorites/:gameId', async (req, res) => {
   }
 });
 
-router.post('/user/:username/reviews', async (req, res) => {
+router.post('/user/:username/reviews', authMiddleware.auth, async (req: any, res) => {
   try {
     const { gameAppId, gameName, rating, text } = req.body;
 
     const user = await User.findOne({ username: req.params.username });
     if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // only allow self to post/update their reviews
+    if (req.user?.id !== user._id.toString())
+      return res.status(403).json({ error: 'Not authorized' });
 
     const existingReview = await Review.findOne({
       userId: user._id,
@@ -200,10 +215,13 @@ router.get('/user/:username/reviews', async (req, res) => {
   }
 });
 
-router.delete('/reviews/:reviewId', async (req, res) => {
+router.delete('/reviews/:reviewId', authMiddleware.auth, async (req: any, res) => {
   try {
     const review = await Review.findById(req.params.reviewId);
     if (!review) return res.status(404).json({ error: 'Review not found' });
+
+    if (review.userId.toString() !== req.user?.id)
+      return res.status(403).json({ error: 'Not authorized' });
 
     await Review.deleteOne({ _id: req.params.reviewId });
     res.json({ success: true });

@@ -1,4 +1,5 @@
 import * as express from 'express';
+import { auth } from '../middleware/auth';
 import jwt from 'jsonwebtoken';
 import User from '../models/user';
 import bcrypt from 'bcryptjs';
@@ -16,8 +17,8 @@ const JWT_SECRET: string = process.env.JWT_SECRET ?? 'devSecret';
 const REFRESH_SECRET: string = process.env.REFRESH_SECRET ?? 'devRefresh';
 
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // limit each IP to 5 login attempts per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: 5,
   message: 'Too many login attempts from this IP, please try again later.',
 });
 
@@ -140,7 +141,7 @@ router.post('/login', authLimiter, async (req, res) => {
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax',
       maxAge: 15 * 60 * 1000,
     });
 
@@ -150,9 +151,6 @@ router.post('/login', authLimiter, async (req, res) => {
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-
-    console.debug('[auth login] created tokens; returning accessToken in body');
-
     return res.json({
       user: {
         id: user._id,
@@ -160,7 +158,6 @@ router.post('/login', authLimiter, async (req, res) => {
         avatarUrl: user.avatarUrl || null,
         emailPublic: !!user.emailPublic,
       },
-      accessToken,
     });
   } catch (err) {
     return res.status(500).json({ message: 'Server error' });
@@ -177,13 +174,11 @@ router.post('/refresh', (req, res) => {
     res.cookie('accessToken', newAccess, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'lax',
       maxAge: 15 * 60 * 1000,
     });
 
-    console.debug('[auth refresh] new access token created; returning in body');
-
-    return res.json({ accessToken: newAccess, message: 'Token refreshed' });
+    return res.json({ message: 'Token refreshed' });
   } catch (e) {
     return res.status(401).json({ message: 'Invalid refresh token' });
   }
@@ -192,7 +187,7 @@ router.post('/refresh', (req, res) => {
 router.post('/logout', (_req, res) => {
   res.clearCookie('accessToken', {
     httpOnly: true,
-    sameSite: 'strict',
+    sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
   });
   res.clearCookie('refreshToken', {
@@ -203,4 +198,15 @@ router.post('/logout', (_req, res) => {
   return res.json({ message: 'Logged out' });
 });
 
+router.get('/me', auth, async (req: AuthRequest, res) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  res.json({
+    id: req.user.id,
+    username: req.user.username,
+    avatarUrl: req.user.avatarUrl || null,
+    emailPublic: !!req.user.emailPublic,
+  });
+});
 export default router;

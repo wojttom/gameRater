@@ -19,18 +19,18 @@
           @for (genre of gameDetails.genres; track genre.id) {
             <span class="gameTag">{{ genre.description }}</span>
           }
-          @for (cat of gameDetails.categories; track cat.id) {
-            <span class="gameTag secondary">{{ cat.description }}</span>
+          @for (category of gameDetails.categories; track category.id) {
+            <span class="gameTag secondary">{{ category.description }}</span>
           }
         </div>
         <div class="gamePlatforms">
-          @if (gameDetails.platforms.windows) {
+          @if (gameDetails?.platforms?.windows) {
             <span class="gamePlatform win">Windows</span>
           }
-          @if (gameDetails.platforms.mac) {
+          @if (gameDetails?.platforms?.mac) {
             <span class="gamePlatform mac">Mac</span>
           }
-          @if (gameDetails.platforms.linux) {
+          @if (gameDetails?.platforms?.linux) {
             <span class="gamePlatform linux">Linux</span>
           }
         </div>
@@ -78,12 +78,31 @@
               @for (dlc of gameDetails.dlc_details; track dlc.id) {
                 <div class="gameDlcItem" (click)="window.open('/g/' + dlc.id, '_self')">
                   <img
-                    [src]="dlc.capsule_image"
+                    [src]="dlc.thumbnail || dlc.capsule_image"
                     [alt]="dlc.name"
                     class="gameDlcThumb"
-                    onerror="this.style.display = 'none'"
+                    (error)="$event.target.src = dlc.capsule_image"
                   />
-                  <div>{{ dlc.name }}</div>
+                  <div class="gameDlcInfo">
+                    <div class="gameDlcName">{{ dlc.name }}</div>
+                    @if (dlc.price_overview) {
+                      <div class="gameDlcPrice">
+                        @if (dlc.price_overview.discount_percent > 0) {
+                          <span class="gamePriceOld">{{
+                            dlc.price_overview.initial_formatted ||
+                              dlc.price_overview.currency + ' ' + dlc.price_overview.initial / 100
+                          }}</span>
+                          <span class="gameDiscount"
+                            >-{{ dlc.price_overview.discount_percent }}%</span
+                          >
+                        }
+                        <span class="gamePriceFinal">{{
+                          dlc.price_overview.final_formatted ||
+                            dlc.price_overview.currency + ' ' + dlc.price_overview.final / 100
+                        }}</span>
+                      </div>
+                    }
+                  </div>
                 </div>
               }
             </div>
@@ -93,11 +112,11 @@
           <h2>About</h2>
           <div [innerHTML]="gameDetails.about_the_game"></div>
         </div>
-        <div class="gameSection">
-          <h2>Videos</h2>
-          @if (safeMovies.length > 0) {
+        @if (movies.length > 0) {
+          <div class="gameSection">
+            <h2>Videos</h2>
             <div class="gameMovies">
-              @for (movie of safeMovies; track movie.id) {
+              @for (movie of movies; track movie.id) {
                 <div class="gameMovieItem">
                   <div class="gameMovieEmbed" [innerHTML]="movie.safeHtml"></div>
                   @if (movie.name) {
@@ -106,10 +125,8 @@
                 </div>
               }
             </div>
-          } @else {
-            <p>No videos</p>
-          }
-        </div>
+          </div>
+        }
         <div class="gameSection">
           <h2>Screenshots</h2>
           <div class="gameScreenshots">
@@ -265,7 +282,7 @@
                   </p>
                   <div class="gameBlogMeta">
                     <span class="gameBlogAuthor">by {{ post.authorId?.username }}</span>
-                    <span class="gameBlogComments">💬 {{ post.commentCount || 0 }}</span>
+                    <span class="gameBlogComments">{{ post.commentCount || 0 }}</span>
                     <span class="gameBlogDate">{{ post.createdAt | date: 'short' }}</span>
                   </div>
                 </div>
@@ -279,7 +296,7 @@
       <div class="gameMainRight">
         <div class="gameSection">
           <h2>Release date</h2>
-          <div>{{ gameDetails.release_date.date || 'Unknown' }}</div>
+          <div>{{ gameDetails.release_date?.date || 'Unknown' }}</div>
         </div>
         <div class="gameSection">
           <h2>Developers</h2>
@@ -289,6 +306,34 @@
           <h2>Publishers</h2>
           <div>{{ gameDetails.publishers?.join(', ') || 'None' }}</div>
         </div>
+        @if (gameDetails.createdBy) {
+          <div class="gameSection">
+            <h2>Added by</h2>
+            <div class="gameReviewContainer">
+              <div class="gameReviewAvatarBox">
+                <img
+                  class="gameReviewAvatar"
+                  [src]="
+                    gameDetails.createdBy?.avatarUrl ||
+                    'https://placehold.co/80x80?text=' +
+                      (gameDetails.createdBy?.username || gameDetails.createdBy)
+                  "
+                  [alt]="gameDetails.createdBy?.username || gameDetails.createdBy"
+                />
+              </div>
+              <div class="gameReviewContent">
+                <div class="gameReviewHeader">
+                  <a
+                    class="gameReviewAuthor hoverBtn"
+                    href="/u/{{ gameDetails.createdBy?.username || gameDetails.createdBy }}"
+                  >
+                    {{ gameDetails.createdBy?.username || gameDetails.createdBy || 'Unknown user' }}
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
         <div class="gameSection">
           <h2>Languages</h2>
           <div [innerHTML]="gameDetails.supported_languages"></div>

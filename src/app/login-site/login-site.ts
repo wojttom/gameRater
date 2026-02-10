@@ -73,9 +73,6 @@ export class LoginSite implements OnInit {
         if (res.user) {
           localStorage.setItem('currentUser', JSON.stringify(res.user));
         }
-        if (res.accessToken) {
-          localStorage.setItem('token', res.accessToken);
-        }
         window.location.href = '/';
       },
       error: () => {

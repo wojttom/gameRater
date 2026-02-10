@@ -112,22 +112,17 @@ export class BlogPost implements OnInit {
 
   deletePost() {
     if (!confirm('Are you sure you want to delete this post?')) return;
+    const isLogged = !!localStorage.getItem('currentUser');
+    if (!isLogged) return;
 
-    const token = localStorage.getItem('token');
-    if (!token) return;
-
-    this.http
-      .delete(`/api/posts/${this.postId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .subscribe({
-        next: () => {
-          this.location.back();
-        },
-        error: (err) => {
-          alert(err.error?.error || 'Error deleting post');
-        },
-      });
+    this.http.delete(`/api/posts/${this.postId}`, { withCredentials: true }).subscribe({
+      next: () => {
+        this.location.back();
+      },
+      error: (err) => {
+        alert(err.error?.error || 'Error deleting post');
+      },
+    });
   }
 
   onCommentAdded(comment: any) {
@@ -138,21 +133,17 @@ export class BlogPost implements OnInit {
   }
 
   onCommentDeleted(commentId: string) {
-    const token = localStorage.getItem('token');
-    if (!token) return;
+    const isLogged = !!localStorage.getItem('currentUser');
+    if (!isLogged) return;
 
-    this.http
-      .delete(`/api/comments/${commentId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .subscribe({
-        next: () => {
-          this.loadComments();
-        },
-        error: (err) => {
-          alert(err.error?.error || 'Error deleting comment');
-        },
-      });
+    this.http.delete(`/api/comments/${commentId}`, { withCredentials: true }).subscribe({
+      next: () => {
+        this.loadComments();
+      },
+      error: (err) => {
+        alert(err.error?.error || 'Error deleting comment');
+      },
+    });
   }
 
   goToAuthor() {

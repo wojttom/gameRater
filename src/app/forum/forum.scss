@@ -211,18 +211,3 @@
     color: rgba(255, 255, 255, 0.6);
   }
 }
-
-@media (max-width: 600px) {
-  .forumFilters {
-    flex-direction: column;
-  }
-
-  .filterGroup {
-    width: 100%;
-
-    select,
-    input {
-      width: 100%;
-    }
-  }
-}

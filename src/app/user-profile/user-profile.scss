@@ -207,17 +207,6 @@
   margin: 8px 0;
 }
 
-/* Responsive - stack on smaller screens */
-@media (max-width: 1024px) {
-  .profileContent {
-    flex-direction: column;
-  }
-
-  .profileContainer {
-    max-width: 900px;
-  }
-}
-
 .profileSection {
   background: rgba(24, 28, 36, 0.6);
   backdrop-filter: blur(8px);

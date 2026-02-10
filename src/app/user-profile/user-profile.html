@@ -27,24 +27,14 @@
             <span class="karmaDisplay">
               Karma: {{ user.reputation || 0 }}
               @if (!isCurrentUser && isLoggedIn) {
-                <span class="profileVoteButtons">
-                  <button
-                    class="voteBtn upvote"
-                    [class.active]="userVote === 1"
-                    (click)="voteOnProfile(1)"
-                    title="Upvote profile"
-                  >
-                    ▲
-                  </button>
-                  <button
-                    class="voteBtn downvote"
-                    [class.active]="userVote === -1"
-                    (click)="voteOnProfile(-1)"
-                    title="Downvote profile"
-                  >
-                    ▼
-                  </button>
-                </span>
+                <app-vote-buttons
+                  [targetType]="'user'"
+                  [targetId]="user._id"
+                  [userVote]="userVote"
+                  (voteChanged)="voteOnProfile($event)"
+                  [horizontal]="false"
+                  [hideScore]="true"
+                ></app-vote-buttons>
               }
             </span>
           </div>
@@ -78,7 +68,7 @@
               <div class="profileGames">
                 @for (game of user.addedGames; track game._id) {
                   <div class="profileGameItem hoverLift" (click)="goToGame(game.appid)">
-                    <img [src]="getGameImageUrl(game)" [alt]="game.name" />
+                    <img [src]="getGameImageUrl(game)" />
                     <div>{{ game.name }}</div>
                   </div>
                 }

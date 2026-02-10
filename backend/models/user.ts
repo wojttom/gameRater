@@ -15,14 +15,13 @@ export interface IUser extends Document {
 
 const UserSchema: Schema = new Schema({
   username: { type: String, required: true, unique: true },
-  // lowercase username used for URLs / lookup
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   avatarUrl: { type: String },
   emailPublic: { type: Boolean, default: false },
   favorites: [
     {
-      appid: { type: Schema.Types.Mixed }, // Can be number (Steam) or string (custom game)
+      appid: { type: Schema.Types.Mixed },
       name: String,
       header_image: String,
       capsule_image: String,

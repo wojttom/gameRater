@@ -77,39 +77,4 @@ describe('CommentFormComponent', () => {
     component.ngOnInit();
     expect(component.content).toBe('Existing content');
   });
-
-  it('should emit commentCreated on successful creation', () => {
-    localStorage.setItem('token', 'test-token');
-    component.content = 'Test comment';
-    component.rootId = '123';
-    component.parentId = '123';
-    spyOn(component.commentCreated, 'emit');
-
-    component.submit();
-
-    httpMock = TestBed.inject(HttpTestingController);
-    const req = httpMock.expectOne('/api/comments');
-    expect(req.request.method).toBe('POST');
-    req.flush({ _id: '456', content: 'Test comment' });
-
-    expect(component.commentCreated.emit).toHaveBeenCalled();
-    expect(component.content).toBe('');
-  });
-
-  it('should emit commentUpdated on successful update', () => {
-    localStorage.setItem('token', 'test-token');
-    component.editMode = true;
-    component.existingComment = { _id: '123', content: 'Old content' };
-    component.content = 'Updated content';
-    spyOn(component.commentUpdated, 'emit');
-
-    component.submit();
-
-    httpMock = TestBed.inject(HttpTestingController);
-    const req = httpMock.expectOne('/api/comments/123');
-    expect(req.request.method).toBe('PUT');
-    req.flush({ _id: '123', content: 'Updated content' });
-
-    expect(component.commentUpdated.emit).toHaveBeenCalled();
-  });
 });

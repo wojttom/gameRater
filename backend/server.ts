@@ -28,7 +28,6 @@ const apiLimiter = rateLimit({
 
 app.use('/api', apiLimiter);
 app.use(cookieParser());
-app.use(cookieParser());
 app.use('/api', userRoutes);
 app.use('/api', postsRoutes);
 app.use('/api', commentsRoutes);
