@@ -63,6 +63,10 @@ export class GameInfo implements OnInit {
     private sanitizer: DomSanitizer,
   ) {}
 
+  goToLogin() {
+    this.router.navigate(['/login']);
+  }
+
   goToUserProfile(username: string) {
     this.router.navigate(['/u', username]);
   }

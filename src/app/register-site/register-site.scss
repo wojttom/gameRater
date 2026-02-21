@@ -159,8 +159,6 @@
 .popup {
   position: relative;
   top: 30px;
-  min-width: 260px;
-  max-width: 340px;
   background: #1b2838;
   border: 2px solid var(--color1);
   border-radius: 6px;
@@ -169,12 +167,10 @@
   font-size: 13px;
   white-space: pre-wrap;
   opacity: 0;
-  transform: translateY(-10px);
+  transform: translateY(-80px);
   pointer-events: none;
   z-index: 50;
-  transition:
-    opacity 0.3s ease,
-    transform 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .popup.active {
@@ -202,7 +198,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: Arial, sans-serif;
 }
 
 .registerInput.invalid-blink,

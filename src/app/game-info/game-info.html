@@ -61,6 +61,8 @@
           >
             {{ isFavorite ? 'Favorited' : 'Add to Favorites' }}
           </button>
+        } @else {
+          <button class="gameFavoriteBtn hoverBtn" (click)="goToLogin()">Add to Favorites</button>
         }
         @if (isDLC && game) {
           <button class="gameBackToMainBtn hoverBtn" (click)="goToMainGame()">
