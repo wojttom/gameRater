@@ -31,7 +31,7 @@ export class UserProfile implements OnInit {
   loading = false;
   error = '';
   editMode = false;
-  editUser = { email: '', password: '', avatar: '', emailPublic: false, bio: '' };
+  editUser = { email: '', password: '', avatar: '', emailPublic: false };
   isCurrentUser = false;
   isLoggedIn = false;
   editError = '';
@@ -136,7 +136,6 @@ export class UserProfile implements OnInit {
       password: '',
       avatar: this.user.avatarUrl || '',
       emailPublic: !!this.user.emailPublic,
-      bio: this.user.bio || '',
     };
     this.editMode = true;
     this.editError = '';
@@ -173,7 +172,6 @@ export class UserProfile implements OnInit {
     if (this.editUser.email) updateData.email = this.editUser.email;
     if (this.editUser.password) updateData.password = this.editUser.password;
     if (this.editUser.avatar) updateData.avatar = this.editUser.avatar;
-    updateData.bio = this.editUser.bio;
     if (typeof this.editUser.emailPublic !== 'undefined')
       updateData.emailPublic = !!this.editUser.emailPublic;
 
