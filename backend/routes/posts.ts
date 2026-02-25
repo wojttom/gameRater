@@ -6,6 +6,7 @@ import GameMention from '../models/gameMention';
 import User from '../models/user';
 import joi from 'joi';
 import * as authMiddleware from '../middleware/auth';
+import xss from 'xss';
 
 const router = express.Router();
 
@@ -118,8 +119,8 @@ router.post('/posts', authMiddleware.auth, async (req: any, res) => {
 
     const post = new Post({
       authorId: req.user.id,
-      title,
-      content,
+      title: xss(title),
+      content: xss(content),
       mentionedGames: mentionedGames || [],
     });
 
@@ -160,8 +161,8 @@ router.put('/posts/:id', authMiddleware.auth, async (req: any, res) => {
 
     const { title, content, mentionedGames } = req.body;
 
-    if (title) post.title = title;
-    if (content) post.content = content;
+    if (title) post.title = xss(title);
+    if (content) post.content = xss(content);
     if (mentionedGames) {
       post.mentionedGames = mentionedGames;
       await GameMention.deleteMany({ postId: post._id });

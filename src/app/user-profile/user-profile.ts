@@ -72,7 +72,7 @@ export class UserProfile implements OnInit {
     this.loading = true;
     this.error = '';
     this.user = null;
-    this.http.get(`/api/user/${this.username}`).subscribe({
+    this.http.get(`/api/user/${this.username}`, { withCredentials: true }).subscribe({
       next: (data) => {
         this.user = data;
         this.loading = false;
@@ -87,7 +87,7 @@ export class UserProfile implements OnInit {
   }
 
   loadUserReviews() {
-    this.http.get(`/api/user/${this.username}/reviews`).subscribe({
+    this.http.get(`/api/user/${this.username}/reviews`, { withCredentials: true }).subscribe({
       next: (data: any) => {
         this.userReviews = data || [];
       },
@@ -100,7 +100,9 @@ export class UserProfile implements OnInit {
   loadUserPosts() {
     this.loadingPosts = true;
     this.http
-      .get<any>(`/api/user/${this.username}/posts?page=${this.postsPage}&limit=5`)
+      .get<any>(`/api/user/${this.username}/posts?page=${this.postsPage}&limit=5`, {
+        withCredentials: true,
+      })
       .subscribe({
         next: (response) => {
           if (this.postsPage === 1) {
@@ -178,7 +180,7 @@ export class UserProfile implements OnInit {
       return;
     }
 
-    this.http.put(`/api/user/${this.username}`, updateData).subscribe({
+    this.http.put(`/api/user/${this.username}`, updateData, { withCredentials: true }).subscribe({
       next: (data) => {
         this.user = data;
         if (this.isCurrentUser) {
@@ -252,7 +254,7 @@ export class UserProfile implements OnInit {
   deleteReview(reviewId: string) {
     if (!confirm('Are you sure you want to delete this review?')) return;
 
-    this.http.delete(`/api/reviews/${reviewId}`).subscribe({
+    this.http.delete(`/api/reviews/${reviewId}`, { withCredentials: true }).subscribe({
       next: () => {
         this.loadUserReviews();
       },
@@ -265,14 +267,16 @@ export class UserProfile implements OnInit {
   loadUserVote() {
     if (!this.isLoggedIn || this.isCurrentUser || !this.user?._id) return;
 
-    this.http.get<{ value: number | null }>(`/api/vote/user/${this.user._id}`).subscribe({
-      next: (res) => {
-        this.userVote = res.value;
-      },
-      error: () => {
-        this.userVote = null;
-      },
-    });
+    this.http
+      .get<{ value: number | null }>(`/api/vote/user/${this.user._id}`, { withCredentials: true })
+      .subscribe({
+        next: (res) => {
+          this.userVote = res.value;
+        },
+        error: () => {
+          this.userVote = null;
+        },
+      });
   }
 
   voteOnProfile(value: any) {
@@ -281,11 +285,15 @@ export class UserProfile implements OnInit {
 
     this.isVoting = true;
     this.http
-      .post<{ reputation: number; userVote: number | null }>('/api/vote', {
-        targetType: 'user',
-        targetId: this.user._id,
-        value: voteValue,
-      })
+      .post<{ reputation: number; userVote: number | null }>(
+        '/api/vote',
+        {
+          targetType: 'user',
+          targetId: this.user._id,
+          value: voteValue,
+        },
+        { withCredentials: true },
+      )
       .subscribe({
         next: (res) => {
           this.user.reputation = res.reputation;

@@ -3,6 +3,7 @@ import User from '../models/user';
 import Review from '../models/review';
 import bcrypt from 'bcrypt';
 import * as authMiddleware from '../middleware/auth';
+import xss from 'xss';
 
 const router = express.Router();
 
@@ -151,16 +152,16 @@ router.post('/user/:username/reviews', authMiddleware.auth, async (req: any, res
 
     if (existingReview) {
       existingReview.rating = rating;
-      existingReview.text = text;
+      existingReview.text = xss(text);
       existingReview.updatedAt = new Date();
       await existingReview.save();
     } else {
       const review = new Review({
         userId: user._id,
         gameAppId,
-        gameName,
+        gameName: xss(gameName),
         rating,
-        text,
+        text: xss(text),
       });
       await review.save();
     }

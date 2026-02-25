@@ -327,18 +327,20 @@ export class GameInfo implements OnInit {
       text: this.reviewText,
     };
 
-    this.http.post(`/api/user/${this.currentUsername}/reviews`, reviewData).subscribe({
-      next: () => {
-        this.showReviewForm = false;
-        this.reviewText = '';
-        this.reviewRating = 5;
-        this.loadReviews();
-      },
-      error: (err) => {
-        console.error('Error saving review', err);
-        alert('Error saving review');
-      },
-    });
+    this.http
+      .post(`/api/user/${this.currentUsername}/reviews`, reviewData, { withCredentials: true })
+      .subscribe({
+        next: () => {
+          this.showReviewForm = false;
+          this.reviewText = '';
+          this.reviewRating = 5;
+          this.loadReviews();
+        },
+        error: (err) => {
+          console.error('Error saving review', err);
+          alert('Error saving review');
+        },
+      });
   }
 
   private prepareMovies() {
@@ -382,7 +384,7 @@ export class GameInfo implements OnInit {
   checkIfFavorite() {
     if (!this.isLoggedIn) return;
 
-    this.http.get(`/api/user/${this.currentUsername}`).subscribe({
+    this.http.get(`/api/user/${this.currentUsername}`, { withCredentials: true }).subscribe({
       next: (user: any) => {
         this.isFavorite = user.favorites.some((fav: any) => {
           return fav.appid === this.currentAppId;
@@ -397,7 +399,7 @@ export class GameInfo implements OnInit {
   deleteReview(reviewId: string) {
     if (!confirm('Are you sure you want to delete this review?')) return;
 
-    this.http.delete(`/api/reviews/${reviewId}`).subscribe({
+    this.http.delete(`/api/reviews/${reviewId}`, { withCredentials: true }).subscribe({
       next: () => {
         this.loadReviews();
       },

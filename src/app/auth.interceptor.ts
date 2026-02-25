@@ -6,6 +6,7 @@ import {
 } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { BehaviorSubject, throwError } from 'rxjs';
 import { catchError, switchMap, filter, take, tap } from 'rxjs/operators';
 
@@ -14,6 +15,7 @@ const refreshSubject = new BehaviorSubject<boolean | null>(null);
 
 export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: HttpHandlerFn) => {
   const http = inject(HttpClient);
+  const router = inject(Router);
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
@@ -38,16 +40,22 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
                 isRefreshing = false;
                 refreshSubject.next(false);
                 localStorage.removeItem('currentUser');
-                window.location.href = '/login';
+                router.navigate(['/login']);
                 return throwError(() => refreshError);
               }),
             );
         }
 
         return refreshSubject.pipe(
-          filter((v) => v === true),
+          filter((v) => v !== null),
           take(1),
-          switchMap(() => next(req)),
+          switchMap((success) => {
+            if (success) {
+              return next(req);
+            } else {
+              return throwError(() => error);
+            }
+          }),
         );
       }
       return throwError(() => error);

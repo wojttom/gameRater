@@ -4,6 +4,7 @@ import Post from '../models/post';
 import Review from '../models/review';
 import Vote from '../models/vote';
 import { auth } from '../middleware/auth';
+import xss from 'xss';
 
 const router = express.Router();
 
@@ -95,7 +96,7 @@ router.post('/comments', auth, async (req: any, res) => {
       parentId,
       rootId,
       rootType,
-      content,
+      content: xss(content),
       depth,
     });
 

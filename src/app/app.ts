@@ -40,14 +40,16 @@ export class App implements OnInit, OnDestroy {
     }
 
     if (this.currentUser && !this.currentUser.avatarUrl) {
-      this.http.get<any>(`/api/user/${this.currentUser.username}`).subscribe({
-        next: (userData) => {
-          this.currentUser = userData;
-          localStorage.setItem('currentUser', JSON.stringify(userData));
-          console.log('Updated Current User with avatarUrl:', this.currentUser?.avatarUrl);
-        },
-        error: () => {},
-      });
+      this.http
+        .get<any>(`/api/user/${this.currentUser.username}`, { withCredentials: true })
+        .subscribe({
+          next: (userData) => {
+            this.currentUser = userData;
+            localStorage.setItem('currentUser', JSON.stringify(userData));
+            console.log('Updated Current User with avatarUrl:', this.currentUser?.avatarUrl);
+          },
+          error: () => {},
+        });
     }
 
     console.log('Current User:', this.currentUser);
