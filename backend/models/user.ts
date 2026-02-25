@@ -6,6 +6,7 @@ export interface IUser extends Document {
   password: string;
   avatarUrl?: string;
   emailPublic?: boolean;
+  bio?: string;
   favorites: any[];
   addedGames: mongoose.Types.ObjectId[];
   reputation: number;
@@ -19,6 +20,7 @@ const UserSchema: Schema = new Schema({
   password: { type: String, required: true },
   avatarUrl: { type: String },
   emailPublic: { type: Boolean, default: false },
+  bio: { type: String, default: '' },
   favorites: [
     {
       appid: { type: Schema.Types.Mixed },

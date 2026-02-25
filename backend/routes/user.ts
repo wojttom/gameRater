@@ -21,7 +21,7 @@ router.get('/user/:username', async (req, res) => {
 
 router.put('/user/:username', authMiddleware.auth, async (req: any, res) => {
   try {
-    const { email, password, avatar } = req.body;
+    const { email, password, avatar, bio } = req.body;
     const update: any = {};
 
     const user = await User.findOne({ username: req.params.username });
@@ -42,6 +42,7 @@ router.put('/user/:username', authMiddleware.auth, async (req: any, res) => {
       update.email = email;
     }
     if (avatar) update.avatarUrl = avatar;
+    if (bio !== undefined) update.bio = bio;
     if (typeof req.body.emailPublic !== 'undefined') update.emailPublic = !!req.body.emailPublic;
     if (password) update.password = await bcrypt.hash(password, 10);
 

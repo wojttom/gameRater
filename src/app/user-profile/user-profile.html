@@ -47,6 +47,23 @@
       <div class="profileContent">
         <div class="profileOverview">
           <div class="profileSection">
+            <h2>Bio <span style="font-size: 0.75em; color: #ff6b6b;">⚠️ XSS Demo</span></h2>
+            @if (editMode) {
+              <textarea
+                [(ngModel)]="editUser.bio"
+                placeholder="Enter your bio (HTML will be rendered - XSS Demo!)"
+                class="bioInput"
+              ></textarea>
+            } @else {
+              @if (user.bio) {
+                <div class="bioContent" [innerHTML]="user.bio"></div>
+              } @else {
+                <p class="emptyText">No bio added yet.</p>
+              }
+            }
+          </div>
+
+          <div class="profileSection">
             <h2>Favorite Games</h2>
             @if (user.favorites?.length) {
               <div class="profileGames">
