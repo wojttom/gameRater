@@ -231,17 +231,14 @@ router.delete('/reviews/:reviewId', authMiddleware.auth, async (req: any, res) =
   }
 });
 
-// Anonymize (soft-delete) user: set display to "archived_account" and make profile unsearchable
 router.delete('/user/:username', authMiddleware.auth, async (req: any, res) => {
   try {
     const user = await User.findOne({ username: req.params.username });
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    // only allow self-delete for now
     if (req.user?.id !== user._id.toString())
       return res.status(403).json({ error: 'Not authorized' });
 
-    // Find the next available suffix (000000 to 999999)
     const existingArchived = await User.find({
       username: { $regex: /^archived_account\d{6}$/ },
     }).select('username');
@@ -261,12 +258,10 @@ router.delete('/user/:username', authMiddleware.auth, async (req: any, res) => {
     user.email = 'deleted' + suffix + '@example.com';
     user.avatarUrl = undefined;
     user.emailPublic = false;
-    // prevent login by replacing password
     user.password = await bcrypt.hash(Date.now().toString() + Math.random(), 10);
 
     await user.save();
 
-    // clear refresh cookie if user deleted themselves
     try {
       res.clearCookie('refreshToken');
     } catch (e) {}

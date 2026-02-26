@@ -209,7 +209,9 @@ export class AddGame implements OnInit {
       createdBy: this.currentUser.id,
     };
 
-    this.http.post('/api/games', gameData).subscribe({
+    console.log('Sending game data:', gameData);
+
+    this.http.post('/api/games', gameData, { withCredentials: true }).subscribe({
       next: (response: any) => {
         this.loading = false;
         this.success = true;
@@ -219,6 +221,7 @@ export class AddGame implements OnInit {
         }, 2000);
       },
       error: (err) => {
+        console.error('Error response:', err);
         this.loading = false;
         this.error = err.error?.error || 'Error adding game';
       },

@@ -6,6 +6,8 @@ const router = express.Router();
 
 router.post('/', async (req, res) => {
   try {
+    console.log('Received game data:', req.body);
+
     const {
       name,
       type,
@@ -29,6 +31,7 @@ router.post('/', async (req, res) => {
     } = req.body;
 
     if (!name || !createdBy) {
+      console.log('Missing fields - name:', name, 'createdBy:', createdBy);
       return res.status(400).json({ error: 'Name and createdBy are required' });
     }
 
@@ -72,7 +75,8 @@ router.post('/', async (req, res) => {
 
     res.status(201).json(customGame);
   } catch (err) {
-    res.status(500).json({ error: 'Server error' });
+    console.error('Error adding custom game:', err);
+    res.status(500).json({ error: 'Server error', details: (err as any).message });
   }
 });
 
