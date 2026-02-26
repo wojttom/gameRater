@@ -17,7 +17,7 @@ const JWT_SECRET: string = process.env.JWT_SECRET ?? 'devSecret';
 const REFRESH_SECRET: string = process.env.REFRESH_SECRET ?? 'devRefresh';
 
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
+  windowMs: 1 * 60 * 1000,
   max: 5,
   message: 'Too many login attempts from this IP, please try again later.',
 });
@@ -141,14 +141,14 @@ router.post('/login', authLimiter, async (req, res) => {
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'strict',
       maxAge: 15 * 60 * 1000,
     });
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     return res.json({
@@ -174,7 +174,7 @@ router.post('/refresh', (req, res) => {
     res.cookie('accessToken', newAccess, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'strict',
       maxAge: 15 * 60 * 1000,
     });
 
@@ -187,12 +187,12 @@ router.post('/refresh', (req, res) => {
 router.post('/logout', (_req, res) => {
   res.clearCookie('accessToken', {
     httpOnly: true,
-    sameSite: 'lax',
+    sameSite: 'strict',
     secure: process.env.NODE_ENV === 'production',
   });
   res.clearCookie('refreshToken', {
     httpOnly: true,
-    sameSite: 'lax',
+    sameSite: 'strict',
     secure: process.env.NODE_ENV === 'production',
   });
   return res.json({ message: 'Logged out' });
